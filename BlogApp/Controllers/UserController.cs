@@ -10,6 +10,7 @@ namespace BlogApp.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize] // Все методы требуют аутентификации
     public class UserController : ControllerBase
     {
         private readonly UserManager<ApplicationUser> _userManager;
@@ -19,16 +20,7 @@ namespace BlogApp.Controllers
             _userManager = userManager;
         }
 
-        //[HttpPost("register")]
-        //public async Task<ActionResult<User>> Register(User user)
-        //{
-        //    var created = await _userService.CreateAsync(user);
-        //    return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
-        //}
-
-        /// <summary>
-        /// Получить всех пользователей (только для админа)
-        /// </summary>
+        // Только админ может получить всех пользователей
         [Authorize(Roles = "Admin")]
         [HttpGet]
         public IActionResult GetAll()
@@ -43,9 +35,6 @@ namespace BlogApp.Controllers
             return Ok(users);
         }
 
-        /// <summary>
-        /// Получить одного пользователя по Id
-        /// </summary>
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(Guid id)
         {
@@ -61,17 +50,14 @@ namespace BlogApp.Controllers
             });
         }
 
-        /// <summary>
-        /// Обновить данные пользователя
-        /// </summary>
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(Guid id, [FromBody] UpdateUserViewModel model)
         {
             var user = await _userManager.FindByIdAsync(id.ToString());
-            if(user == null)
+            if (user == null)
                 return NotFound();
 
-            //Только админ может редактировать других пользователей
+            // Только админ может редактировать других пользователей
             if (user.Id.ToString() != User.FindFirstValue(ClaimTypes.NameIdentifier) && !User.IsInRole("Admin"))
                 return Forbid();
 
@@ -80,15 +66,12 @@ namespace BlogApp.Controllers
 
             var result = await _userManager.UpdateAsync(user);
             if (!result.Succeeded)
-            {
                 return BadRequest(result.Errors);
-            }
+
             return NoContent();
         }
 
-        /// <summary>
-        /// Удалить пользователя
-        /// </summary>
+        // Удалять пользователей может только админ
         [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
@@ -98,32 +81,28 @@ namespace BlogApp.Controllers
                 return NotFound();
 
             var result = await _userManager.DeleteAsync(user);
-            if(!result.Succeeded)
+            if (!result.Succeeded)
                 return BadRequest(result.Errors);
 
             return NoContent();
         }
 
-        ///<summary>
-        ///Сменить пароль
-        ///</summary>
-        [HttpPost ("{id}/change-password")]
+        // Смена пароля — авторизованный пользователь или админ
+        [HttpPost("{id}/change-password")]
         public async Task<IActionResult> ChangePassword(Guid id, [FromBody] ChangePasswordViewModel model)
         {
             var user = await _userManager.FindByIdAsync(id.ToString());
             if (user == null)
                 return NotFound();
 
-            //Только админ может менять пароль других пользователей
             if (user.Id.ToString() != User.FindFirstValue(ClaimTypes.NameIdentifier) && !User.IsInRole("Admin"))
                 return Forbid();
 
             var result = await _userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
             if (!result.Succeeded)
-            {
                 return BadRequest(result.Errors);
-            }
-            return Ok(new {Message = "Пароль успешно изменен" });
+
+            return Ok(new { Message = "Пароль успешно изменен" });
         }
     }
 }

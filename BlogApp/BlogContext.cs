@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BlogApp
 {
-    public class BlogContext : IdentityDbContext<ApplicationUser>
+    public class BlogContext : IdentityDbContext<ApplicationUser, Role, string>
     {
         public BlogContext(DbContextOptions<BlogContext> options)
            : base(options)

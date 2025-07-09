@@ -50,6 +50,9 @@ namespace BlogApp.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginViewModel model)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             var result = await _signInManager.PasswordSignInAsync(
                 model.UserName,
                 model.Password,

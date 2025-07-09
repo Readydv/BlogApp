@@ -7,7 +7,7 @@ namespace BlogApp.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize]
+    [Authorize] // Все методы требуют аутентификации
     public class TagController : ControllerBase
     {
         private readonly ITagService _tagService;
@@ -28,13 +28,12 @@ namespace BlogApp.Controllers
         {
             var tag = await _tagService.GetByIdAsync(id);
             if (tag == null)
-            {
                 return NotFound();
-            }
             return Ok(tag);
         }
 
-        [HttpPost]
+        // Создавать и редактировать теги могут админ и пользователь (возможно с ограничениями по своим тегам)
+        [Authorize(Roles = "Admin,User")]
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] Tag model)
         {
@@ -42,6 +41,7 @@ namespace BlogApp.Controllers
             return Ok(created);
         }
 
+        [Authorize(Roles = "Admin,User")]
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(Guid id, [FromBody] Tag model)
         {
@@ -55,6 +55,7 @@ namespace BlogApp.Controllers
             return NoContent();
         }
 
+        // Удалять теги может только админ
         [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)

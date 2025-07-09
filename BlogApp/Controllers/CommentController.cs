@@ -8,7 +8,7 @@ namespace BlogApp.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize]
+    [Authorize] // Все методы требуют аутентификации
     public class CommentController : ControllerBase
     {
         private readonly ICommentService _commentService;
@@ -26,13 +26,11 @@ namespace BlogApp.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<IEnumerable<Comment>>> GetById(Guid id)
+        public async Task<ActionResult<Comment>> GetById(Guid id)
         {
             var comment = await _commentService.GetByIdAsync(id);
             if (comment == null)
-            {
                 return NotFound();
-            }
             return Ok(comment);
         }
 
@@ -44,6 +42,8 @@ namespace BlogApp.Controllers
             return Ok(created);
         }
 
+        // Редактировать комментарии могут админ, модератор и автор
+        [Authorize(Roles = "Admin,Moderator")]
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(Guid id, [FromBody] Comment model)
         {
@@ -51,7 +51,10 @@ namespace BlogApp.Controllers
             if (comment == null)
                 return NotFound();
 
-            if (comment.AuthorId.ToString() != User.FindFirstValue(ClaimTypes.NameIdentifier) && !User.IsInRole("Admin"))
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userRole = User.FindFirstValue(ClaimTypes.Role);
+
+            if (userRole != "Admin" && userRole != "Moderator" && comment.AuthorId != userId)
                 return Forbid();
 
             comment.Content = model.Content;
@@ -60,6 +63,8 @@ namespace BlogApp.Controllers
             return NoContent();
         }
 
+        // Удалять комментарии могут админ, модератор и автор
+        [Authorize(Roles = "Admin,Moderator")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {
@@ -67,7 +72,10 @@ namespace BlogApp.Controllers
             if (comment == null)
                 return NotFound();
 
-            if (comment.AuthorId.ToString() != User.FindFirstValue(ClaimTypes.NameIdentifier) && !User.IsInRole("Admin"))
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userRole = User.FindFirstValue(ClaimTypes.Role);
+
+            if (userRole != "Admin" && userRole != "Moderator" && comment.AuthorId != userId)
                 return Forbid();
 
             await _commentService.DeleteAsync(id);
