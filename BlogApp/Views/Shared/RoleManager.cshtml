@@ -1,0 +1,66 @@
+﻿@model IEnumerable<BlogApp.ViewModels.RoleViewModel>
+
+@{
+    ViewData["Title"] = "Управление ролями";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8">
+            <h2>@ViewData["Title"]</h2>
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Добавить новую роль</h5>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Create" method="post">
+                        @Html.AntiForgeryToken()
+                        <div class="form-group">
+                            <label for="Name">Название роли</label>
+                            <input type="text" class="form-control" id="Name" name="Name" required />
+                        </div>
+                        <div class="form-group mt-2">
+                            <label for="Description">Описание</label>
+                            <textarea type="text" class="form-control" id="Description" name="Description"></textarea>
+                        </div>
+                        <button type="submit" class="btn-submit">Добавить</button>
+                    </form>
+                </div>
+                <!-- Список ролей -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Список ролей</h5>
+                    </div>
+                    <div class="card-body">
+                        @foreach (var role in Model)
+                        {
+                            <div class="role-item mb-2 d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>@role.Name</strong><br />
+                                    <small>@role.Description</small>
+                                </div>
+                                <div class="d-flex">
+                                    <!-- Редактирование -->
+                                    <form asp-action="Edit" method="post" class="d-flex align-items-center">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@role.Id" />
+                                        <input type="text" name="Name" value="@role.Name" class="form-control form-control-sm me-1" />
+                                        <input type="text" name="Description" value="@role.Description" class="form-control form-control-sm me-1" />
+                                        <button type="submit" class="btn btn-sm btn-outline-primary">Сохранить</button>
+                                    </form>
+
+                                    <!-- Удаление -->
+                                    <form asp-action="Delete" method="post" class="ms-2">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@role.Id" />
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">Удалить</button>
+                                    </form>
+                                </div>
+                            </div>
+                        }
+                    </div>
+            </div>
+        </div>
+    </div>
+</div>

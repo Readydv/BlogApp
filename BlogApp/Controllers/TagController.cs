@@ -1,14 +1,14 @@
 ﻿using BlogApp.InterfaceServices;
 using BlogApp.Models;
+using BlogApp.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BlogApp.Controllers
 {
-    [ApiController]
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     [Authorize] // Все методы требуют аутентификации
-    public class TagController : ControllerBase
+    public class TagController : Controller
     {
         private readonly ITagService _tagService;
         public TagController(ITagService tagService)
@@ -17,11 +17,18 @@ namespace BlogApp.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Tag>>> GetAll()
+        public async Task<IActionResult> Index()
         {
             var tags = await _tagService.GetAllAsync();
-            return Ok(tags);
+            var viewModel = tags.Select(t => new TagViewModel
+            {
+                Id = t.Id,
+                Name = t.Name
+            }).ToList();
+
+            return View("~/Views/Shared/TagManager.cshtml", viewModel);
         }
+
 
         [HttpGet("{id}")]
         public async Task<ActionResult<Tag>> GetById(Guid id)
@@ -32,36 +39,56 @@ namespace BlogApp.Controllers
             return Ok(tag);
         }
 
-        // Создавать и редактировать теги могут админ и пользователь (возможно с ограничениями по своим тегам)
         [Authorize(Roles = "Admin,User")]
-        [HttpPost]
-        public async Task<IActionResult> Create([FromBody] Tag model)
+        [HttpPost("create")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(TagViewModel model)
         {
-            var created = await _tagService.CreateAsync(model);
-            return Ok(created);
+            if (ModelState.IsValid)
+            {
+                var tag = new Tag { Name = model.Name };
+                await _tagService.CreateAsync(tag);
+                return RedirectToAction(nameof(Index));
+            }
+
+            // Если ошибки валидации, возвращаем на страницу с текущими тегами
+            var tags = await _tagService.GetAllAsync();
+            var viewModel = tags.Select(t => new TagViewModel
+            {
+                Id = t.Id,
+                Name = t.Name
+            }).ToList();
+
+            return View("Index", viewModel);
         }
 
         [Authorize(Roles = "Admin,User")]
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update(Guid id, [FromBody] Tag model)
+        [HttpPost("edit/{id}")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(Guid id, TagViewModel model)
         {
-            var tag = await _tagService.GetByIdAsync(id);
-            if (tag == null)
-                return NotFound();
+            if (ModelState.IsValid)
+            {
+                var tag = await _tagService.GetByIdAsync(id);
+                if (tag == null)
+                {
+                    return NotFound();
+                }
 
-            tag.Name = model.Name;
-            await _tagService.UpdateAsync(tag);
+                tag.Name = model.Name;
+                await _tagService.UpdateAsync(tag);
+            }
 
-            return NoContent();
+            return RedirectToAction(nameof(Index));
         }
 
-        // Удалять теги может только админ
         [Authorize(Roles = "Admin")]
-        [HttpDelete("{id}")]
+        [HttpPost("delete/{id}")]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(Guid id)
         {
             await _tagService.DeleteAsync(id);
-            return NoContent();
+            return RedirectToAction(nameof(Index));
         }
     }
 }

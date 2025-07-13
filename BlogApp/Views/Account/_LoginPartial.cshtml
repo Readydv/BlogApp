@@ -13,19 +13,19 @@
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
         <div>
-                <label asp-for="UserName"></label>
+                <label asp-for="UserName">Имя пользователя</label>
                 <input asp-for="UserName" class="form-control" />
             <span asp-validation-for="UserName" class="text-danger"></span>
         </div>
 
         <div>
-                <label asp-for="Password"></label>
+                <label asp-for="Password">Пароль</label>
                 <input asp-for="Password" class="form-control" type="password" />
                 <span asp-validation-for="Password" class="text-danger"></span>
         </div>
 
         <div class="center">
-            <input class="btn_submit" type="submit" value="Войти" />
+            <input class="btn-submit" type="submit" value="Войти" />
         </div>
 
         <div class="auth-footer">
