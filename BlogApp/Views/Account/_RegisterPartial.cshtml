@@ -1,0 +1,50 @@
+﻿@model BlogApp.ViewModels.RegisterViewModel
+@{
+    ViewData["Title"] = "Регистрация";
+}
+
+<div class="block-reg background-white">
+    <h3 class="center">Регистрация</h3>
+    <form asp-action="Register" asp-controller="Auth" method="post">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+        <div>
+                <label asp-for="UserName"></label>
+                <input asp-for="UserName" class="form-control" />
+                <span asp-validation-for="UserName" class="text-danger"></span>
+        </div>
+
+        <div>
+                <label asp-for="Email"></label>
+                <input asp-for="Email" class="form-control" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+        </div>
+
+        <div>
+                <label asp-for="Password"></label>
+                <input asp-for="Password" class="form-control" type="password" />
+                <span asp-validation-for="Password" class="text-danger"></span>
+        </div>
+
+        <div>
+                <label asp-for="ConfirmPassword"></label>
+                <input asp-for="ConfirmPassword" class="form-control" type="password" />
+                <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+        </div>
+
+        <div class="center" style="margin-top: 20px">
+            <input class="btn-submit" type="submit" value="Зарегистрироваться" />
+        </div>
+
+        <div class="auth-footer">
+            Уже есть аккаунт?
+            <a href="javascript:void(0);" onclick="showLoginForm()" class="auth-link">Войдите</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

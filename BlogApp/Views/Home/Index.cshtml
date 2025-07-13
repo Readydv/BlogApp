@@ -1,8 +1,64 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@using Microsoft.AspNetCore.Identity
+@using BlogApp.Models
+@using BlogApp.ViewModels
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+@{
+    ViewData["Title"] = "Главная";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="auth-container">
+@if (SignInManager.IsSignedIn(User))
+{
+    <div>
+        <h2>Здравствуйте, @User.Identity.Name!</h2>
+        <p>Вы вошли в систему.</p>
+    </div>
+}
+else
+{
+    <div class="row">
+        <div class="side">
+            <div class="center">
+                Добро пожаловать в наш блог! Регистрируйтесь и делитесь своими постами.
+            </div>
+            <img class="main-img" src="https://pngimg.com/uploads/writing/writing_PNG108.png" alt="Blog Image" />
+        </div>
+            <div class="main">
+                <div id="auth-forms-container">
+                    <!-- Форма входа (по умолчанию) -->
+                    <div id="login-form">
+                        <partial name="~/Views/Account/_LoginPartial.cshtml" model="new LoginViewModel()" />
+                    </div>
+
+                    <!-- Форма регистрации (скрыта) -->
+                    <div id="register-form" style="display: none;">
+                        <partial name="~/Views/Account/_RegisterPartial.cshtml" model="new RegisterViewModel()" />
+                    </div>
+                </div>
+            </div>
+    </div>
+}
 </div>
+
+@section Scripts {
+    <script>
+        function showRegisterForm() {
+            // Плавное исчезновение формы входа
+            $('#login-form').fadeOut(300, function() {
+                // Плавное появление формы регистрации
+                $('#register-form').fadeIn(300);
+            });
+        }
+
+        function showLoginForm() {
+            // Плавное исчезновение формы регистрации
+            $('#register-form').fadeOut(300, function() {
+                // Плавное появление формы входа
+                $('#login-form').fadeIn(300);
+            });
+        }
+    </script>
+}

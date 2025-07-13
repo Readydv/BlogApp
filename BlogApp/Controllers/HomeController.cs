@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using BlogApp.Models;
+using BlogApp.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BlogApp.Controllers
@@ -15,7 +16,12 @@ namespace BlogApp.Controllers
 
         public IActionResult Index()
         {
-            return View();
+            var model = new MainViewModel
+            {
+                LoginViewModel = new LoginViewModel(),
+                RegisterViewModel = new RegisterViewModel()
+            };
+            return View(model);
         }
 
         public IActionResult Privacy()

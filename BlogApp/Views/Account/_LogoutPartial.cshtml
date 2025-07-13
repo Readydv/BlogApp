@@ -1,0 +1,11 @@
+﻿@using Microsoft.AspNetCore.Identity;
+@using BlogApp.Models;
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+@if (SignInManager.IsSignedIn(User))
+{
+    <form asp-area="" asp-controller="Auth" asp-action="Logout" method="post" style="display:inline;">
+        <button type="submit" class="logoutButton">Выход</button>
+    </form>
+}

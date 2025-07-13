@@ -3,12 +3,11 @@ using BlogApp.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 
 namespace BlogApp.Controllers
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class AuthController : ControllerBase
+    public class AuthController : Controller
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
@@ -19,12 +18,27 @@ namespace BlogApp.Controllers
             _signInManager = signInManager;
         }
 
-        /// <summary>
-        /// Регистрация нового пользователя
-        /// </summary>
-        [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] RegisterViewModel model)
+        [HttpGet]
+        [Route("Register")]
+        public IActionResult Register()
         {
+            return View();
+        }
+
+        [HttpPost]
+        [Route("Register")]
+        public async Task<IActionResult> Register(RegisterViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                // Возвращаем модель с ошибками в то же представление
+                return View("~/Views/Home/Index.cshtml", new MainViewModel
+                {
+                    RegisterViewModel = model,
+                    LoginViewModel = new LoginViewModel()
+                });
+            }
+
             var user = new ApplicationUser
             {
                 UserName = model.UserName,
@@ -35,51 +49,72 @@ namespace BlogApp.Controllers
 
             if (!result.Succeeded)
             {
-                return BadRequest(result.Errors);
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
+                return View("~/Views/Home/Index.cshtml", new MainViewModel
+                {
+                    RegisterViewModel = model,
+                    LoginViewModel = new LoginViewModel()
+                });
             }
 
-            //Назначаем роль "User" новому пользователю
             await _userManager.AddToRoleAsync(user, "User");
+            await _signInManager.SignInAsync(user, isPersistent: false);
 
-            return Ok(new { Message = "Регистрация прошла успешно" });
+            // Перенаправляем на главную страницу после успешной регистрации
+            return RedirectToAction("Index", "Home");
         }
 
-        /// <summary>
-        /// Логи пользователя   
-        /// </summary>
-        [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginViewModel model)
+        [HttpGet]
+        [Route("Login")]
+        public IActionResult Login()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [Route("Login")]
+        public async Task<IActionResult> Login(LoginViewModel model)
         {
             if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            { 
+                return View(model);
+            }
 
             var result = await _signInManager.PasswordSignInAsync(
                 model.UserName,
                 model.Password,
                 isPersistent: false,
-                lockoutOnFailure: false
-                );
+                lockoutOnFailure: false);
 
             if (!result.Succeeded)
-                return Unauthorized();
+            {
+                ModelState.AddModelError(string.Empty, "Неверное имя пользователя или пароль");
+                return View(model);
+            }
 
-            return Ok(new {Message = "Вы успешно вошли в систему"});
+            // Перенаправляем на главную страницу (Index)
+            return RedirectToAction("Index", "Home");
         }
 
-        /// <summary>
-        /// Получение текущего пользователя
-        /// </summary>
         [Authorize]
-        [HttpGet("me")]
-        public async Task <IActionResult> Me()
+        [HttpPost]
+        [Route("Logout")]
+        public async Task<IActionResult> Logout()
+        {
+            await _signInManager.SignOutAsync();
+            return RedirectToAction("Index", "Home");
+        }
+
+        [Authorize]
+        [HttpGet]
+        [Route("Me")]
+        public async Task<IActionResult> Me()
         {
             var user = await _userManager.GetUserAsync(User);
-            return Ok(new
-            {
-                user.Id,
-                user.UserName,
-                user.Email,
-            });
+            return View(user); // Создайте соответствующее View
         }
     }
 }
