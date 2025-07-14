@@ -15,8 +15,6 @@ namespace BlogApp.Services
 
         public async Task<Post> CreateAsync(Post post)
         {
-            post.CreatedDate = DateTime.UtcNow;
-
             _context.Posts.Add(post);
             await _context.SaveChangesAsync();
 
@@ -31,6 +29,15 @@ namespace BlogApp.Services
             .Include(p => p.PostTags)
                 .ThenInclude(pt => pt.Tag)
             .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Post>> GetAllWithTagsAsync()
+        {
+            return await _context.Posts
+                .Include(p => p.PostTags)
+                .ThenInclude(pt => pt.Tag)
+                .OrderByDescending(p => p.CreatedDate)
+                .ToListAsync();
         }
 
         public async Task<IEnumerable<Post>> GetByAuthorAsync(string authorId)

@@ -32,12 +32,13 @@ namespace BlogApp.Controllers
 
         [HttpPost("create")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(RoleViewModel model)
+        public async Task<IActionResult> Create(CreateRoleViewModel model)
         {
             if (ModelState.IsValid)
             {
                 var role = new Role
                 {
+                    Id = Guid.NewGuid().ToString(),
                     Name = model.Name,
                     Description = model.Description
                 };
@@ -54,15 +55,14 @@ namespace BlogApp.Controllers
 
             var roles = _roleManager.Roles.Select(r => new RoleViewModel
             {
-                Id = r.Id,
                 Name = r.Name,
                 Description = r.Description
             }).ToList();
 
-            return View("Index", roles);
+            return View("~/Views/Shared/RoleManager.cshtml", roles);
         }
 
-        [HttpPost("edit")]
+        [HttpPost("edit/{id}")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(string id, RoleViewModel model)
         {
@@ -84,7 +84,7 @@ namespace BlogApp.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        [HttpPost("delete")]
+        [HttpPost("delete/{id}")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(string id)
         {

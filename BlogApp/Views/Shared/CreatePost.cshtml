@@ -1,0 +1,63 @@
+﻿@model BlogApp.ViewModels.CreatePostViewModel
+
+@{
+    ViewData["Title"] = "Создание новой статьи";
+}
+
+<div class="container mt-4">
+    <h2>Создание новой статьи</h2>
+    <hr />
+
+    <form asp-action="Create" method="post" class="mt-4" enctype="multipart/form-data">
+        @Html.AntiForgeryToken()
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+        <div class="form-group mb-3">
+            <label asp-for="Title" class="control-label">Заголовок</label>
+            <input asp-for="Title" class="form-control" placeholder="Введите заголовок статьи" />
+            <span asp-validation-for="Title" class="text-danger"></span>
+        </div>
+
+        <div class="form-group mb-3">
+            <label asp-for="Content" class="control-label">Содержание</label>
+            <textarea asp-for="Content" class="form-control" rows="10" placeholder="Напишите содержание статьи"></textarea>
+            <span asp-validation-for="Content" class="text-danger"></span>
+        </div>
+
+        <div class="form-group mb-4">
+            <label class="control-label">Теги</label>
+            <div class="row">
+                @foreach (var tag in Model.AvailableTags)
+                {
+                    <div class="col-md-3 mb-2">
+                        <div class="form-check">
+                            <input class="form-check-input"
+                                   type="checkbox"
+                                   name="SelectedTagId"
+                                   value="@tag.Id"
+                                   id="tag-@tag.Id">
+                            <label class="form-check-label" for="tag-@tag.Id">
+                                @tag.Name
+                            </label>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="form-group d-flex justify-content-between">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> Опубликовать
+            </button>
+            <a asp-action="AllPosts" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Вернуться ко всем статьям
+            </a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

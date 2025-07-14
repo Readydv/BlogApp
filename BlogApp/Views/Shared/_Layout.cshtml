@@ -40,6 +40,9 @@
                             <span class="menu-span" onclick="location.href='@Url.Action("Index", "Role")'" style="cursor: pointer;">
                                 Роли
                             </span>
+                            <span class="menu-span" onclick="location.href = '@Url.Action("Index", "Post")'" style="cursor: pointer;">
+                                Статьи
+                            </span>
                         </div>
                         <form asp-controller="Auth" asp-action="Logout" method="post" class="ml-auto">
                             
@@ -64,6 +67,15 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     @await RenderSectionAsync("Scripts", required: false)
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
 </body>
 </html>

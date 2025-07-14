@@ -7,6 +7,7 @@ namespace BlogApp.InterfaceServices
     {
         Task<Post> CreateAsync(Post post);
         Task<IEnumerable<Post>> GetAllAsync();
+        Task<IEnumerable<Post>> GetAllWithTagsAsync();
         Task<IEnumerable<Post>> GetByAuthorAsync(string authorId);
         Task<Post> GetByIdAsync(Guid id);
         Task UpdateAsync(Post post);

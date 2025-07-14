@@ -55,3 +55,21 @@
     color: #3498db;
 }
 
+.card {
+    transition: transform 0.2s;
+}
+
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+.badge {
+    font-size: 0.9em;
+    padding: 5px 10px;
+}
+
+.alert-info {
+    background-color: #f3f3f3;
+    border-color: #c5c5c5;
+}

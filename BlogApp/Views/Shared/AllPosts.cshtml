@@ -1,0 +1,50 @@
+﻿@model BlogApp.ViewModels.PostListViewModel
+
+@{
+    ViewData["Title"] = "Все статьи";
+}
+
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Персональный блог</h1>
+        <a asp-action="Create" class="btn btn-primary">Добавить статью</a>
+    </div>
+
+    @if (Model.Posts.Any())
+    {
+        <div class="row">
+            @foreach (var post in Model.Posts)
+            {
+                <div class="col-md-12 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">@post.Title</h5>
+
+                            <div class="mb-2">
+                                @foreach (var tag in post.Tags)
+                                {
+                                    <span class="badge bg-secondary me-1">@tag</span>
+                                }
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="text-muted">Просмотров: @post.ViewCount</span>
+                                <div>
+                                    <a asp-action="Edit" asp-route-id="@post.Id" class="btn btn-sm btn-outline-primary me-1">Редактировать</a>
+                                    <form asp-action="Delete" asp-route-id="@post.Id" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">Удалить</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info">Статей пока нет</div>
+    }
+</div>

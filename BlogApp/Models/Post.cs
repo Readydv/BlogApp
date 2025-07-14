@@ -6,6 +6,7 @@
         public string Title { get; set; }
         public string Content { get; set; }
         public DateTime CreatedDate { get; set; }
+        public int ViewCount { get; set; } = 0;
 
         public string AuthorId { get; set; }
         public virtual ApplicationUser Author { get; set; }
