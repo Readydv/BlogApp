@@ -1,0 +1,42 @@
+﻿@using System.Security.Claims
+@model BlogApp.Models.Post
+
+@{
+    ViewData["Title"] = Model.Title;
+}
+
+<div class="container mt-4">
+    <article class="blog-post">
+        <h1 class="blog-post-title">@Model.Title</h1>
+        <p class="blog-post-meta">
+            @Model.CreatedDate.ToString("dd MMMM yyyy") •
+            Автор: @Model.Author?.UserName •
+            Просмотров: @Model.ViewCount
+        </p>
+
+        <div class="mb-3">
+            @foreach (var postTag in Model.PostTags)
+            {
+                <span class="badge bg-secondary me-1">@postTag.Tag.Name</span>
+            }
+        </div>
+
+        <div class="blog-post-content">
+            @Html.Raw(Model.Content.Replace(Environment.NewLine, "<br />"))
+        </div>
+    </article>
+
+    <div class="mt-5">
+        <a asp-action="Index" class="btn btn-outline-primary">
+            <i class="fas fa-arrow-left"></i> Назад к списку статей
+        </a>
+
+        @if (User.Identity.IsAuthenticated &&
+        (User.IsInRole("Admin") || User.IsInRole("Moderator") || Model.AuthorId == User.FindFirstValue(ClaimTypes.NameIdentifier)))
+        {
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-warning ms-2">
+                <i class="fas fa-edit"></i> Редактировать
+            </a>
+        }
+    </div>
+</div>

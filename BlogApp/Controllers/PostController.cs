@@ -127,17 +127,19 @@ namespace BlogApp.Controllers
 
         [HttpGet("{id}")]
         [AllowAnonymous]
-        public async Task<ActionResult<Post>> GetById(Guid id)
+        public async Task<IActionResult> GetById(Guid id)
         {
-            var post = await _postService.GetByIdAsync(id);
+            var post = await _postService.GetByIdWithDetailsAsync(id); // Нужно реализовать этот метод
             if (post == null)
+            {
                 return NotFound();
+            }
 
             // Увеличиваем счетчик просмотров
             post.ViewCount++;
             await _postService.UpdateAsync(post);
 
-            return View(post);
+            return View("~/Views/Shared/PostInfo.cshtml", post); // Создадим это представление
         }
 
         // Редактировать пост могут: автор, модератор, админ
