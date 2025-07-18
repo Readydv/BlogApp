@@ -20,7 +20,27 @@ namespace BlogApp.Services
             await _context.SaveChangesAsync();
             return comment;
         }
-        
+
+        public async Task<Comment> CreateFromViewAsync(Guid postId, string content, string authorId)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+                throw new ArgumentException("Комментарий не может быть пустым.");
+
+            var comment = new Comment
+            {
+                Id = Guid.NewGuid(),
+                PostId = postId,
+                Content = content,
+                CreatedDate = DateTime.UtcNow,
+                AuthorId = authorId
+            };
+
+            _context.Comments.Add(comment);
+            await _context.SaveChangesAsync();
+
+            return comment;
+        }
+
         public async Task<IEnumerable<Comment>> GetAllAsync ()
         {
             return await _context.Comments

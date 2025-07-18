@@ -144,7 +144,7 @@ namespace BlogApp.Controllers
 
         // Редактировать пост могут: автор, модератор, админ
         [HttpGet("edit/{id}")]
-        [Authorize(Roles = "Admin,Moderator")]
+        [Authorize]
         public async Task<IActionResult> Edit(Guid id)
         {
             var post = await _postService.GetByIdAsync(id);
@@ -175,7 +175,7 @@ namespace BlogApp.Controllers
         }
 
         [HttpPost("edit/{id}")]
-        [Authorize(Roles = "Admin,Moderator")]
+        [Authorize]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(Guid id, EditPostViewModel model)
         {

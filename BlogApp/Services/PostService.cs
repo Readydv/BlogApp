@@ -24,11 +24,12 @@ namespace BlogApp.Services
         public async Task<Post> GetByIdWithDetailsAsync(Guid id)
         {
             return await _context.Posts
-                .Include(p => p.Author)
-                .Include(p => p.Comments)
-                .Include(p => p.PostTags)
-                    .ThenInclude(pt => pt.Tag)
-                .FirstOrDefaultAsync(p => p.Id == id);
+        .Include(p => p.Author)
+        .Include(p => p.Comments)
+            .ThenInclude(c => c.Author) // <-- Это нужно
+        .Include(p => p.PostTags)
+            .ThenInclude(pt => pt.Tag)
+        .FirstOrDefaultAsync(p => p.Id == id);
         }
 
         public async Task<IEnumerable<Post>> GetAllAsync()
