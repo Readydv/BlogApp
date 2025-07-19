@@ -73,3 +73,11 @@
     background-color: #f3f3f3;
     border-color: #c5c5c5;
 }
+
+.square-btn {
+    width: 25px;
+    height: 25px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}

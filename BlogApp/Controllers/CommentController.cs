@@ -39,6 +39,66 @@ namespace BlogApp.Controllers
             return Ok(comment);
         }
 
+        [Authorize]
+        [HttpGet("edit/{id}")]
+        public async Task<IActionResult> Edit(Guid id, string returnUrl = null)
+        {
+            var comment = await _commentService.GetByIdAsync(id);
+            if (comment == null) return NotFound();
+
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var isAdminOrModerator = User.IsInRole("Admin") || User.IsInRole("Moderator");
+
+            if (!isAdminOrModerator && comment.AuthorId != userId)
+            {
+                return Forbid();
+            }
+
+            var model = new CommentEditViewModel
+            {
+                Id = comment.Id,
+                Content = comment.Content,
+                PostId = comment.PostId
+            };
+
+            ViewData["ReturnUrl"] = returnUrl;
+            return View("~/Views/Shared/EditComment.cshtml", model);
+        }
+
+        [Authorize]
+        [HttpPost("edit/{id}")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(Guid id, CommentEditViewModel model, string returnUrl = null)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View("~/Views/Shared/EditComment.cshtml", model);
+            }
+
+            var comment = await _commentService.GetByIdAsync(id);
+            if (comment == null) return NotFound();
+
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var isAdminOrModerator = User.IsInRole("Admin") || User.IsInRole("Moderator");
+
+            if (!isAdminOrModerator && comment.AuthorId != userId)
+            {
+                return Forbid();
+            }
+
+            comment.Content = model.Content;
+            await _commentService.UpdateAsync(comment);
+
+            // Универсальный редирект
+            if (!string.IsNullOrEmpty(returnUrl))
+            {
+                return Redirect(returnUrl);
+            }
+
+            // Дефолтный редирект, если returnUrl не указан
+            return RedirectToAction("Index");
+        }
+
         [HttpPost("create")]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Create(CommentCreateViewModel model)

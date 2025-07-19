@@ -49,9 +49,9 @@ namespace BlogApp.Services
             var isAdminOrModerator = user.IsInRole("Admin") || user.IsInRole("Moderator");
 
             var query = _context.Comments
-        .Include(c => c.Author)
-        .Include(c => c.Post)
-        .AsQueryable();
+                .Include(c => c.Author)
+                .Include(c => c.Post)
+                .AsQueryable();
 
             // Если не админ/модератор - показываем только свои комментарии
             if (!isAdminOrModerator)
@@ -70,6 +70,7 @@ namespace BlogApp.Services
                     CreatedDate = c.CreatedDate,
                     PostId = c.PostId,
                     PostTitle = c.Post.Title,
+                    CanEdit = isAdminOrModerator || c.AuthorId == userId, // Исправлено здесь
                     CanDelete = isAdminOrModerator || c.AuthorId == userId
                 })
                 .ToListAsync();

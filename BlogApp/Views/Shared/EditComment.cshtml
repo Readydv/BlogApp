@@ -1,0 +1,31 @@
+﻿@model BlogApp.ViewModels.CommentEditViewModel
+
+@{
+    ViewData["Title"] = "Редактирование комментария";
+}
+
+<div class="container">
+    <h1 class="my-4">@ViewData["Title"]</h1>
+
+    <form asp-action="Edit" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="Id" />
+        <input type="hidden" asp-for="PostId" />
+        <input type="hidden" name="returnUrl" value="@Context.Request.Query["returnUrl"]" />
+
+        <div class="form-group mb-3">
+            <label asp-for="Content"></label>
+            <textarea asp-for="Content" class="form-control" rows="5"></textarea>
+            <span asp-validation-for="Content" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <button type="submit" class="btn btn-primary">Сохранить</button>
+            <a asp-action="AllComments" class="btn btn-secondary">Отмена</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

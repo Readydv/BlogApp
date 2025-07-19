@@ -44,13 +44,23 @@
                             @if (User.Identity.IsAuthenticated &&
                            (User.IsInRole("Admin") || User.IsInRole("Moderator") || comment.AuthorId == User.FindFirstValue(ClaimTypes.NameIdentifier)))
                             {
-                                <form asp-controller="Comment" asp-action="Delete" asp-route-id="@comment.Id" method="post">
-                                    @Html.AntiForgeryToken()
-                                    <button type="submit" class="btn btn-sm btn-outline-danger"
-                                            onclick="return confirm('Вы уверены, что хотите удалить этот комментарий?')">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </button>
-                                </form>
+                                <div class="d-flex align-items-center">
+                                    <!-- Кнопка редактирования -->
+                                    <a asp-controller="Comment" asp-action="Edit" asp-route-id="@comment.Id" asp-route-returnUrl="@Url.Action("GetById", "Post", new { id = Model.Id })"
+                                       class="btn btn-sm btn-outline-primary square-btn me-1 d-flex align-items-center justify-content-center" title="Редактировать">
+                                        <i class="fas fa-pencil-alt"></i> ✏️
+                                    </a>
+
+                                    <!-- Кнопка удаления -->
+                                    <form asp-controller="Comment" asp-action="Delete" asp-route-id="@comment.Id" method="post">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-outline-danger square-btn d-flex align-items-center justify-content-center"
+                                                onclick="return confirm('Вы уверены, что хотите удалить этот комментарий?')"
+                                                title="Удалить">
+                                            <i class="fas fa-trash-alt"></i> ❌
+                                        </button>
+                                    </form>
+                                </div>
                             }
                         </div>
                         <p class="card-text mt-2">@comment.Content</p>
