@@ -22,10 +22,11 @@ namespace BlogApp.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Comment>>> GetAll()
+        [Authorize]
+        public async Task<IActionResult> Index()
         {
-            var comments = await _commentService.GetAllAsync();
-            return Ok(comments);
+            var comments = await _commentService.GetAllCommentsWithViewModelAsync(User);
+            return View("AllComments", comments);
         }
 
         [HttpGet("{id}")]

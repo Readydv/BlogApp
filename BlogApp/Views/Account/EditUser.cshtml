@@ -1,0 +1,69 @@
+﻿@model BlogApp.ViewModels.EditUserViewModel
+@{
+    ViewData["Title"] = "Редактирование пользователя";
+}
+
+<div class="container">
+    <h1>@ViewData["Title"]</h1>
+
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <form asp-action="Edit" asp-route-id="@Model.Id" method="post">
+        <input type="hidden" asp-for="Id" />
+
+        <div class="form-group mb-3">
+            <label asp-for="UserName" class="form-label">Имя пользователя</label>
+            <input asp-for="UserName" class="form-control" />
+            <span asp-validation-for="UserName" class="text-danger"></span>
+        </div>
+
+        <div class="form-group mb-3">
+            <label asp-for="Email" class="form-label">Почтовый адрес</label>
+            <input asp-for="Email" class="form-control" />
+            <span asp-validation-for="Email" class="text-danger"></span>
+        </div>
+
+        <div class="form-group mb-3">
+            <label class="form-label">Роли</label>
+            @if (Model.AvailableRoles != null && Model.AvailableRoles.Any())
+            {
+                <div>
+                    @foreach (var role in Model.AvailableRoles)
+                    {
+                        <div class="form-check">
+                            @if (role.Name == "User")
+                            {
+                                <input type="checkbox"
+                                       class="form-check-input role-user"
+                                       checked
+                                       disabled>
+                                <input type="hidden" name="SelectedRoles" value="@role.Name">
+                            }
+                            else
+                            {
+                                <input class="form-check-input"
+                                       type="checkbox"
+                                       name="SelectedRoles"
+                                       value="@role.Name"
+                                       id="role_@role.Name"
+                                @(Model.SelectedRoles.Contains(role.Name) ? "checked" : "")>
+                            }
+                            <label class="form-check-label @(role.Name == "User" ? "role-label-disabled" : "")"
+                                   for="role_@role.Name"
+                                   title="@role.Description">
+                                @role.Name
+                            </label>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <p class="text-muted">Нет доступных ролей</p>
+            }
+        </div>
+
+        <button type="submit" class="btn btn-primary">Сохранить</button>
+        <a asp-action="Index" class="btn btn-secondary">Отмена</a>
+    </form>
+</div>

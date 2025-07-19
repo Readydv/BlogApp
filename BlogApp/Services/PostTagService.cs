@@ -32,6 +32,11 @@ namespace BlogApp.Services
             }
         }
 
+        public async Task<int> GetPostCountForTagAsync(Guid tagId)
+        {
+            return await _context.PostTags.CountAsync(pt => pt.TagId == tagId);
+        }
+
         public async Task<IEnumerable<Tag>> GetTagsForPostAsync(Guid postId)
         {
             return await _context.PostTags

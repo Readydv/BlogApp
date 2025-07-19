@@ -1,5 +1,6 @@
 ﻿using BlogApp.InterfaceServices;
 using BlogApp.Models;
+using BlogApp.Services;
 using BlogApp.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -11,20 +12,30 @@ namespace BlogApp.Controllers
     public class TagController : Controller
     {
         private readonly ITagService _tagService;
-        public TagController(ITagService tagService)
+        private readonly IPostTagService _postTagService;
+
+        public TagController(ITagService tagService, IPostTagService postTagService)
         {
             _tagService = tagService;
+            _postTagService = postTagService;
         }
 
         [HttpGet]
         public async Task<IActionResult> Index()
         {
             var tags = await _tagService.GetAllAsync();
-            var viewModel = tags.Select(t => new TagViewModel
+            var viewModel = new List<TagViewModel>();
+
+            foreach (var tag in tags)
             {
-                Id = t.Id,
-                Name = t.Name
-            }).ToList();
+                var postCount = await _postTagService.GetPostCountForTagAsync(tag.Id); // Получаем количество статей
+                viewModel.Add(new TagViewModel
+                {
+                    Id = tag.Id,
+                    Name = tag.Name,
+                    PostCount = postCount
+                });
+            }
 
             return View("~/Views/Shared/TagManager.cshtml", viewModel);
         }

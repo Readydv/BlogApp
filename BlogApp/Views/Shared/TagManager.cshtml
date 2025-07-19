@@ -36,22 +36,44 @@
                 <div class="card-body">
                     @foreach (var tag in Model)
                     {
-                        <div class="tag-item mb-2 d-flex justify-content-between align-items-center">
+                        <div class="tag-item mb-3 d-flex justify-content-between align-items-center">
                             <span>@tag.Name</span>
-                            <div>
-                                <!-- Форма редактирования -->
-                                <form asp-action="Edit" asp-route-id="@tag.Id" method="post" class="d-inline">
+                            <div class="d-flex align-items-center">
+                                <!-- Форма редактирования с количеством статей СЛЕВА от инпута -->
+                                <form asp-action="Edit" asp-route-id="@tag.Id" method="post" class="d-flex align-items-center">
                                     @Html.AntiForgeryToken()
                                     <input type="hidden" name="Id" value="@tag.Id">
-                                    <input type="text" name="Name" value="@tag.Name" class="form-control-sm">
+
+                                    <!-- Количество статей СЛЕВА -->
+                                    <span class="text-muted small mr-3">
+                                        (@tag.PostCount
+                                        @if (tag.PostCount % 10 == 1 && tag.PostCount % 100 != 11)
+                                        {
+                                            <text>статья</text>
+                                        }
+                                        else if (tag.PostCount % 10 >= 2 && tag.PostCount % 10 <= 4 &&
+                                        (tag.PostCount % 100 < 10 || tag.PostCount % 100 >= 20))
+                                        {
+                                            <text>статьи</text>
+                                        }
+                                        else
+                                        {
+                                            <text>статей</text>
+                                        })
+                                    </span>
+
+                                    <!-- Поле ввода -->
+                                    <input type="text" name="Name" value="@tag.Name" class="form-control form-control-sm mr-2" style="width: 150px;">
+
+                                    <!-- Кнопка "Сохранить" -->
                                     <button type="submit" class="btn btn-sm btn-outline-primary">Сохранить</button>
                                 </form>
 
                                 <!-- Форма удаления -->
-                                <form asp-action="Delete" asp-route-id="@tag.Id" method="post" class="d-inline">
+                                <form asp-action="Delete" asp-route-id="@tag.Id" method="post" class="ml-2">
                                     @Html.AntiForgeryToken()
                                     <input type="hidden" name="id" value="@tag.Id">
-                                    <button type="submit" class="btn btn-sm btn-outline-danger ml-2">Удалить</button>
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">Удалить</button>
                                 </form>
                             </div>
                         </div>

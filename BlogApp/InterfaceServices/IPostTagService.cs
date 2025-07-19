@@ -6,6 +6,7 @@ namespace BlogApp.InterfaceServices
     {
         Task AddTagToPostAsync(Guid postId, Guid tagId);
         Task<IEnumerable<Tag>> GetTagsForPostAsync(Guid postId);
+        Task<int> GetPostCountForTagAsync(Guid tagId);
         Task RemoveTagFromPostAsync(Guid postId, Guid tagId);
     }
 }

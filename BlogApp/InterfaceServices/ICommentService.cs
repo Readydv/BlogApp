@@ -1,4 +1,6 @@
 ﻿using BlogApp.Models;
+using BlogApp.ViewModels;
+using System.Security.Claims;
 
 namespace BlogApp.InterfaceServices
 {
@@ -9,6 +11,7 @@ namespace BlogApp.InterfaceServices
         Task<Comment> CreateFromViewAsync(Guid postId, string content, string authorId);
         Task<Comment> GetByIdAsync(Guid id);
         Task UpdateAsync (Comment comment);
+        Task<IEnumerable<CommentViewModel>> GetAllCommentsWithViewModelAsync(ClaimsPrincipal user);
         Task DeleteAsync (Guid id);
     }
 }

@@ -1,6 +1,8 @@
 ﻿using BlogApp.InterfaceServices;
 using BlogApp.Models;
+using BlogApp.ViewModels;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace BlogApp.Services
 {
@@ -39,6 +41,38 @@ namespace BlogApp.Services
             await _context.SaveChangesAsync();
 
             return comment;
+        }
+
+        public async Task<IEnumerable<CommentViewModel>> GetAllCommentsWithViewModelAsync(ClaimsPrincipal user)
+        {
+            var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
+            var isAdminOrModerator = user.IsInRole("Admin") || user.IsInRole("Moderator");
+
+            var query = _context.Comments
+        .Include(c => c.Author)
+        .Include(c => c.Post)
+        .AsQueryable();
+
+            // Если не админ/модератор - показываем только свои комментарии
+            if (!isAdminOrModerator)
+            {
+                query = query.Where(c => c.AuthorId == userId);
+            }
+
+            return await query
+                .OrderByDescending(c => c.CreatedDate)
+                .Select(c => new CommentViewModel
+                {
+                    Id = c.Id,
+                    Content = c.Content,
+                    AuthorName = c.Author.UserName,
+                    AuthorId = c.AuthorId,
+                    CreatedDate = c.CreatedDate,
+                    PostId = c.PostId,
+                    PostTitle = c.Post.Title,
+                    CanDelete = isAdminOrModerator || c.AuthorId == userId
+                })
+                .ToListAsync();
         }
 
         public async Task<IEnumerable<Comment>> GetAllAsync ()

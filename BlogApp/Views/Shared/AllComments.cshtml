@@ -1,0 +1,68 @@
+﻿@using System.Security.Claims
+@model IEnumerable<BlogApp.ViewModels.CommentViewModel>
+
+@{
+    ViewData["Title"] = User.IsInRole("Admin") || User.IsInRole("Moderator")
+        ? "Все комментарии"
+        : "Мои комментарии";
+}
+
+<div class="container">
+    <h1 class="my-4">@ViewData["Title"]</h1>
+
+    @if (Model.Any())
+    {
+        <div class="row">
+            @foreach (var comment in Model)
+            {
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <h5 class="card-title mb-0">
+                                    @comment.AuthorName
+                                    @if (comment.AuthorId == User.FindFirstValue(ClaimTypes.NameIdentifier))
+                                    {
+                                        <span class="badge bg-info ms-2">Ваш</span>
+                                    }
+                                </h5>
+                                <small class="text-muted">@comment.CreatedDate.ToString("dd.MM.yyyy HH:mm")</small>
+                            </div>
+                            <p class="card-text">@comment.Content</p>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">
+                                    Статья:
+                                    <a asp-controller="Post" asp-action="GetById" asp-route-id="@comment.PostId"
+                                       class="text-decoration-none">
+                                        @comment.PostTitle
+                                    </a>
+                                </small>
+
+                                @if (comment.CanDelete)
+                                {
+                                    <form asp-controller="Comment" asp-action="Delete" asp-route-id="@comment.Id" method="post">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-outline-danger"
+                                                onclick="return confirm('Удалить этот комментарий?')">
+                                            <i class="fas fa-trash-alt"></i> Удалить
+                                        </button>
+                                    </form>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info">
+            @(User.IsInRole("Admin") || User.IsInRole("Moderator")
+                ? "Комментарии не найдены"
+                : "У вас пока нет комментариев")
+        </div>
+    }
+</div>

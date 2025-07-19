@@ -28,13 +28,13 @@
                     @if (SignInManager.IsSignedIn(User))
                     {
                         <div class="menu-container">
-                            <span class="menu-span" onclick="location.href='@Url.Action()'" style="cursor: pointer;">
+                            <span class="menu-span" onclick="location.href='@Url.Action("Index", "Comment")'" style="cursor: pointer;">
                                 Комментарии
                             </span>
                             <span class="menu-span" onclick="location.href='@Url.Action("Index", "Tag")'" style="cursor: pointer;">
                                 Теги
                             </span>
-                            <span class="menu-span" onclick="location.href='@Url.Action()'" style="cursor: pointer;">
+                            <span class="menu-span" onclick="location.href='@Url.Action("Index", "User")'" style="cursor: pointer;">
                                 Пользователи
                             </span>
                             <span class="menu-span" onclick="location.href='@Url.Action("Index", "Role")'" style="cursor: pointer;">
