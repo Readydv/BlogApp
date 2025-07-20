@@ -39,19 +39,18 @@
                                         @comment.PostTitle
                                     </a>
                                 </small>
+                                <div class="d-flex gap-2">
                                 @if (comment.CanEdit)
                                 {
-                                    <div class="mt-2">
                                         <a asp-controller="Comment" asp-action="Edit" asp-route-id="@comment.Id"
-                                           class="btn btn-sm btn-outline-primary me-2">
+                                           class="btn btn-sm btn-outline-primary">
                                             <i class="fas fa-edit"></i> Редактировать
                                         </a>
-                                    </div>
                                 }
 
                                 @if (comment.CanDelete)
                                 {
-                                    <form asp-controller="Comment" asp-action="Delete" asp-route-id="@comment.Id" method="post">
+                                    <form asp-controller="Comment" asp-action="Delete" asp-route-id="@comment.Id" method="post" class="d-inline">
                                         @Html.AntiForgeryToken()
                                         <button type="submit" class="btn btn-sm btn-outline-danger"
                                                 onclick="return confirm('Удалить этот комментарий?')">
@@ -59,6 +58,7 @@
                                         </button>
                                     </form>
                                 }
+                                </div>
                             </div>
                         </div>
                     </div>

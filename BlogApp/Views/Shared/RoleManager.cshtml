@@ -52,7 +52,7 @@
                                     </form>
 
                                     <!-- Удаление -->
-                                    <form asp-action="Delete" asp-route-id = "@role.Id" method="post" class="ms-2">
+                                    <form asp-action="Delete" asp-route-id="@role.Id" method="post" class="d-flex align-items-center ms-2">
                                         @Html.AntiForgeryToken()
                                         <input type="hidden" name="id" value="@role.Id" />
                                         <button type="submit" class="btn btn-sm btn-outline-danger">Удалить</button>

@@ -45,7 +45,7 @@
                                     <input type="hidden" name="Id" value="@tag.Id">
 
                                     <!-- Количество статей СЛЕВА -->
-                                    <span class="text-muted small mr-3">
+                                    <span class="text-muted small mr-3 me-2">
                                         (@tag.PostCount
                                         @if (tag.PostCount % 10 == 1 && tag.PostCount % 100 != 11)
                                         {
@@ -63,10 +63,10 @@
                                     </span>
 
                                     <!-- Поле ввода -->
-                                    <input type="text" name="Name" value="@tag.Name" class="form-control form-control-sm mr-2" style="width: 150px;">
+                                    <input type="text" name="Name" value="@tag.Name" class="form-control form-control-sm mr-2 me-2" style="width: 200px;">
 
                                     <!-- Кнопка "Сохранить" -->
-                                    <button type="submit" class="btn btn-sm btn-outline-primary">Сохранить</button>
+                                    <button type="submit" class="btn btn-sm btn-outline-primary me-2">Сохранить</button>
                                 </form>
 
                                 <!-- Форма удаления -->
