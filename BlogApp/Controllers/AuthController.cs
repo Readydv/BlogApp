@@ -1,8 +1,10 @@
-﻿using BlogApp.Models;
+﻿using BlogApp.InterfaceServices;
+using BlogApp.Models;
 using BlogApp.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace BlogApp.Controllers
@@ -11,11 +13,13 @@ namespace BlogApp.Controllers
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly IUserProfileService _userProfileService;
 
-        public AuthController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager)
+        public AuthController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IUserProfileService userProfileService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _userProfileService = userProfileService;
         }
 
         [HttpGet]
@@ -118,12 +122,27 @@ namespace BlogApp.Controllers
         }
 
         [Authorize]
-        [HttpGet]
-        [Route("Me")]
+        [HttpGet("Me")]
         public async Task<IActionResult> Me()
         {
-            var user = await _userManager.GetUserAsync(User);
-            return View(user); // Создайте соответствующее View
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var model = await _userProfileService.GetUserProfileAsync(userId);
+            return View("~/Views/Account/Profile.cshtml", model);
+        }
+
+        [Authorize]
+        [HttpGet("Profile/{userId?}")]
+        public async Task<IActionResult> Profile(string userId = null)
+        {
+            userId ??= User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var model = await _userProfileService.GetUserProfileAsync(userId);
+
+            if (model.User == null)
+            {
+                return NotFound();
+            }
+
+            return View("~/Views/Account/Profile.cshtml", model);
         }
     }
 }

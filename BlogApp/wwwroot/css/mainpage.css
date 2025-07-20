@@ -81,3 +81,33 @@
     align-items: center;
     justify-content: center;
 }
+
+.profile-card {
+    position: sticky;
+    top: 20px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.profile-stats {
+    display: flex;
+    justify-content: space-around;
+    border-top: 1px solid #eee;
+    padding-top: 15px;
+}
+
+.stat-item {
+    text-align: center;
+}
+
+.tag-cloud {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.list-group-item {
+    transition: all 0.3s ease;
+}
+
+    .list-group-item:hover {
+        background-color: #f8f9fa;
+    }

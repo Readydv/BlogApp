@@ -245,7 +245,6 @@ namespace BlogApp.Controllers
         }
 
         [HttpPost("delete/{id}")]
-        [Authorize(Roles = "Admin,Moderator")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(Guid id)
         {

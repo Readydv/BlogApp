@@ -1,0 +1,130 @@
+﻿@model BlogApp.ViewModels.UserProfileViewModel
+
+@{
+    ViewData["Title"] = $"Профиль пользователя {Model.User.UserName}";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <!-- Боковая панель -->
+        <div class="col-md-4">
+            <div class="card profile-card">
+                <div class="card-body text-center">
+                    <h3>@Model.User.UserName</h3>
+                    <p class="text-muted">@Model.User.Email</p>
+
+                    <div class="profile-stats mt-4">
+                        <div class="stat-item">
+                            <h5>@Model.TotalPosts</h5>
+                            <p class="text-muted">Статей</p>
+                        </div>
+                        <div class="stat-item">
+                            <h5>@Model.TotalComments</h5>
+                            <p class="text-muted">Комментариев</p>
+                        </div>
+                        <div class="stat-item">
+                            <h5>@Model.TotalTags</h5>
+                            <p class="text-muted">Тегов</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Основной контент -->
+        <div class="col-md-8">
+            <!-- Секция статей -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4>Статьи пользователя</h4>
+                </div>
+                <div class="card-body">
+                    @if (Model.Posts.Any())
+                    {
+                        <div class="list-group">
+                            @foreach (var post in Model.Posts)
+                            {
+                                <a asp-controller="Post" asp-action="GetById" asp-route-id="@post.Id"
+                                   class="list-group-item list-group-item-action">
+                                    <h5>@post.Title</h5>
+                                    <small class="text-muted">@post.CreatedDate.ToString("dd MMMM yyyy")</small>
+                                    <div class="mt-2">
+                                        @foreach (var tag in post.PostTags.Select(pt => pt.Tag))
+                                        {
+                                            <span class="badge bg-secondary me-1">@tag.Name</span>
+                                        }
+                                    </div>
+                                </a>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted">Пользователь еще не создал статей</p>
+                    }
+                </div>
+            </div>
+
+            <!-- Секция комментариев -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4>Комментарии пользователя</h4>
+                </div>
+                <div class="card-body">
+                    @if (Model.Comments.Any())
+                    {
+                        <div class="list-group">
+                            @foreach (var comment in Model.Comments.OrderByDescending(c => c.CreatedDate))
+                            {
+                                <div class="list-group-item">
+                                    <div class="d-flex justify-content-between">
+                                        <small class="text-muted">@comment.CreatedDate.ToString("dd MMMM yyyy HH:mm")</small>
+                                        <a asp-controller="Post" asp-action="GetById" asp-route-id="@comment.PostId"
+                                           class="btn btn-sm btn-outline-primary">
+                                            К статье
+                                        </a>
+                                    </div>
+                                    <p class="mt-2">@comment.Content</p>
+                                    <small>
+                                        К статье:
+                                        <a asp-controller="Post" asp-action="GetById" asp-route-id="@comment.PostId">
+                                            @comment.Post?.Title
+                                        </a>
+                                    </small>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted">Пользователь еще не оставлял комментариев</p>
+                    }
+                </div>
+            </div>
+
+            <!-- Секция тегов -->
+            <div class="card">
+                <div class="card-header">
+                    <h4>Используемые теги</h4>
+                </div>
+                <div class="card-body">
+                    @if (Model.Tags.Any())
+                    {
+                        <div class="tag-cloud">
+                            @foreach (var tag in Model.Tags)
+                            {
+                                <h2 class="badge bg-secondary me-1 mb-1">
+                                    @tag.Name
+                                </h2>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted">Пользователь еще не использует теги</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

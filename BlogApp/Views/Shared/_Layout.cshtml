@@ -17,42 +17,40 @@
 <body>
     <header>
         <nav class="navbar navbar-expand-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <div class="topnav">
-                    <!-- Логотип/название -->
-                    <span class="navbar-brand" onclick="location.href='@Url.Action("Index", "Home")'" style="cursor: pointer; font-size: 1.8rem; font-weight: 700;">
-                        ВашБлог
-                    </span>
+            <div class="container-fluid d-flex justify-content-between align-items-center">
 
-                    <!-- Кнопка выхода -->
-                    @if (SignInManager.IsSignedIn(User))
-                    {
-                        <div class="menu-container">
-                            <span class="menu-span" onclick="location.href='@Url.Action("Index", "Comment")'" style="cursor: pointer;">
-                                Комментарии
-                            </span>
-                            <span class="menu-span" onclick="location.href='@Url.Action("Index", "Tag")'" style="cursor: pointer;">
-                                Теги
-                            </span>
+                <!-- Логотип -->
+                <span class="navbar-brand"
+                      onclick="location.href='@Url.Action("Index", "Home")'"
+                      style="cursor: pointer; font-size: 1.8rem; font-weight: 700;">
+                    ВашБлог
+                </span>
+
+                @if (SignInManager.IsSignedIn(User))
+                {
+                    <div class="d-flex align-items-center w-100 justify-content-between">
+
+                        <!-- Меню -->
+                        <div class="d-flex align-items-center gap-4 flex-grow-1 ps-3">
+                            <span class="menu-span" onclick="location.href='@Url.Action("Index", "Comment")'">Комментарии</span>
+                            <span class="menu-span" onclick="location.href='@Url.Action("Index", "Tag")'">Теги</span>
                             @if (User.IsInRole("Admin"))
                             {
-                                <span class="menu-span" onclick="location.href='@Url.Action("Index", "User")'" style="cursor: pointer;">
-                                    Пользователи
-                                </span>
-                                <span class="menu-span" onclick="location.href='@Url.Action("Index", "Role")'" style="cursor: pointer;">
-                                    Роли
-                                </span>
+                                <span class="menu-span" onclick="location.href='@Url.Action("Index", "User")'">Пользователи</span>
+                                <span class="menu-span" onclick="location.href='@Url.Action("Index", "Role")'">Роли</span>
                             }
-                            <span class="menu-span" onclick="location.href = '@Url.Action("Index", "Post")'" style="cursor: pointer;">
-                                Статьи
-                            </span>
+                            <span class="menu-span" onclick="location.href='@Url.Action("Index", "Post")'">Статьи</span>
                         </div>
-                        <form asp-controller="Auth" asp-action="Logout" method="post" class="ml-auto">
-                            
-                            <button type="submit" class="logoutButton">Выход</button>
-                        </form>
-                    }
-                </div>
+
+                        <!-- Профиль + выход -->
+                        <div class="d-flex align-items-center gap-3">
+                            <span class="menu-span" onclick="location.href='@Url.Action("Profile", "Auth")'">Мой профиль</span>
+                            <form asp-controller="Auth" asp-action="Logout" method="post" class="m-0">
+                                <button type="submit" class="logoutButton">Выход</button>
+                            </form>
+                        </div>
+                    </div>
+                }
             </div>
         </nav>
     </header>
