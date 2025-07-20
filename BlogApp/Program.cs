@@ -28,15 +28,34 @@ builder.Services.AddIdentity<ApplicationUser, Role>(options =>
 .AddEntityFrameworkStores<BlogContext>()
 .AddDefaultTokenProviders();
 
+// Настройка куки
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.LoginPath = "/Auth/Login";
+    options.AccessDeniedPath = "/Error/403";
+    options.Cookie.HttpOnly = true;
+    options.ExpireTimeSpan = TimeSpan.FromDays(30);
+    options.SlidingExpiration = true;
+});
+
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
+// Настройка обработки ошибок
+app.UseStatusCodePagesWithReExecute("/Error/{0}");  // Для кодов 400-599
+app.UseExceptionHandler("/Error/500");
+
+// Конвейер middleware
+if (app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Home/Error");
+    app.UseDeveloperExceptionPage();
+}
+else
+{
+    app.UseExceptionHandler("/Error/500");
     app.UseHsts();
 }
 
+app.UseStatusCodePagesWithReExecute("/Error/{0}");
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 

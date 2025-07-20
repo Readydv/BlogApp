@@ -28,13 +28,13 @@ else
             <div class="main">
                 <div id="auth-forms-container">
                     <!-- Форма входа (по умолчанию) -->
-                    <div id="login-form">
-                        <partial name="~/Views/Account/_LoginPartial.cshtml" model="new LoginViewModel()" />
+                    <div id="login-form" style="@(Model.ActiveForm == "login" ? "" : "display: none;")">
+                        <partial name="~/Views/Account/_LoginPartial.cshtml" model="Model.LoginViewModel" />
                     </div>
 
-                    <!-- Форма регистрации (скрыта) -->
-                    <div id="register-form" style="display: none;">
-                        <partial name="~/Views/Account/_RegisterPartial.cshtml" model="new RegisterViewModel()" />
+                    <!-- Форма регистрации -->
+                    <div id="register-form" style="@(Model.ActiveForm == "register" ? "" : "display: none;")">
+                        <partial name="~/Views/Account/_RegisterPartial.cshtml" model="Model.RegisterViewModel" />
                     </div>
                 </div>
             </div>

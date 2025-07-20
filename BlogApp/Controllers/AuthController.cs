@@ -35,7 +35,8 @@ namespace BlogApp.Controllers
                 return View("~/Views/Home/Index.cshtml", new MainViewModel
                 {
                     RegisterViewModel = model,
-                    LoginViewModel = new LoginViewModel()
+                    LoginViewModel = new LoginViewModel(),
+                    ActiveForm = "register"
                 });
             }
 
@@ -56,7 +57,8 @@ namespace BlogApp.Controllers
                 return View("~/Views/Home/Index.cshtml", new MainViewModel
                 {
                     RegisterViewModel = model,
-                    LoginViewModel = new LoginViewModel()
+                    LoginViewModel = new LoginViewModel(),
+                    ActiveForm = "register"
                 });
             }
 
@@ -76,11 +78,15 @@ namespace BlogApp.Controllers
 
         [HttpPost]
         [Route("Login")]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginViewModel model)
         {
             if (!ModelState.IsValid)
-            { 
-                return View(model);
+            {
+                return View("~/Views/Home/Index.cshtml", new MainViewModel
+                {
+                    LoginViewModel = model,
+                });
             }
 
             var result = await _signInManager.PasswordSignInAsync(
@@ -92,7 +98,10 @@ namespace BlogApp.Controllers
             if (!result.Succeeded)
             {
                 ModelState.AddModelError(string.Empty, "Неверное имя пользователя или пароль");
-                return View(model);
+                return View("~/Views/Home/Index.cshtml", new MainViewModel
+                {
+                    LoginViewModel = model,
+                });
             }
 
             // Перенаправляем на главную страницу (Index)
