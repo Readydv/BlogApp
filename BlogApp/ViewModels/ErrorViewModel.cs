@@ -1,4 +1,4 @@
-namespace BlogApp.Models
+namespace BlogApp.ViewModels
 {
     public class ErrorViewModel
     {
