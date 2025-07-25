@@ -50,7 +50,12 @@ try
     });
 
     builder.Logging.ClearProviders(); //Убрал стандартные логгеры
-    builder.Logging.SetMinimumLevel(LogLevel.Information); //Логирую все от уровня инфо
+    builder.Logging.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Information); //Логирую все от уровня инфо
+
+    // Отключил логирование EF Core и системных логов
+    builder.Logging.AddFilter("Microsoft.EntityFrameworkCore", Microsoft.Extensions.Logging.LogLevel.Warning);
+    builder.Logging.AddFilter("Microsoft", Microsoft.Extensions.Logging.LogLevel.Warning);
+    builder.Logging.AddFilter("System", Microsoft.Extensions.Logging.LogLevel.Warning);
     builder.Host.UseNLog(); //Само подключение
 
     var app = builder.Build();

@@ -30,6 +30,7 @@ namespace BlogApp.Controllers
         [HttpGet("create")]
         public async Task<IActionResult> Create()
         {
+            _logger.LogInformation("Отображение формы создания поста для пользователя {UserId}", User.FindFirstValue(ClaimTypes.NameIdentifier));
             var model = new CreatePostViewModel
             {
                 AvailableTags = await _tagService.GetAllAsync()
@@ -129,17 +130,21 @@ namespace BlogApp.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> GetById(Guid id)
         {
-            var post = await _postService.GetByIdWithDetailsAsync(id); // Нужно реализовать этот метод
+            _logger.LogDebug("Запрос поста {PostId}", id);
+
+            var post = await _postService.GetByIdWithDetailsAsync(id);
             if (post == null)
             {
+                _logger.LogWarning("Пост {PostId} не найден", id);
                 return NotFound();
             }
 
-            // Увеличиваем счетчик просмотров
+            // Увеличиваю счетчик просмотров
             post.ViewCount++;
             await _postService.UpdateAsync(post);
+            _logger.LogDebug("Увеличение счетчика просмотров для поста {PostId}", id);
 
-            return View("~/Views/Shared/PostInfo.cshtml", post); // Создадим это представление
+            return View("~/Views/Shared/PostInfo.cshtml", post); // Создаю это представление
         }
 
         // Редактировать пост могут: автор, модератор, админ
@@ -147,9 +152,12 @@ namespace BlogApp.Controllers
         [Authorize]
         public async Task<IActionResult> Edit(Guid id)
         {
+            _logger.LogDebug("Запрос поста {PostId} для отображения", id);
+
             var post = await _postService.GetByIdAsync(id);
             if (post == null)
             {
+                _logger.LogWarning("Пост {PostId} не найден", id);
                 return NotFound();
             }
 
@@ -159,6 +167,7 @@ namespace BlogApp.Controllers
 
             if (userRole != "Admin" && userRole != "Moderator" && post.AuthorId != userId)
             {
+                _logger.LogWarning("Попытка несанкционированного входа пользователем {UserName}.", User.FindFirstValue(ClaimTypes.Name));
                 return Forbid();
             }
 
@@ -181,15 +190,18 @@ namespace BlogApp.Controllers
         {
             if (!ModelState.IsValid)
             {
+                _logger.LogWarning("Редактирование не удалось: модель не валидна.");
                 model.AvailableTags = await _tagService.GetAllAsync();
                 return View("PostEdit", model);
             }
 
             try
             {
+                _logger.LogDebug("Запрос поста {PostId}", id);
                 var existingPost = await _postService.GetByIdAsync(id);
                 if (existingPost == null)
                 {
+                    _logger.LogWarning("Пост {PostId} не найден", id);
                     return NotFound();
                 }
 
@@ -199,6 +211,7 @@ namespace BlogApp.Controllers
 
                 if (userRole != "Admin" && userRole != "Moderator" && existingPost.AuthorId != userId)
                 {
+                    _logger.LogWarning("Попытка несанкционированного входа пользователем {UserName}.", User.FindFirstValue(ClaimTypes.Name));
                     return Forbid();
                 }
 
@@ -207,6 +220,8 @@ namespace BlogApp.Controllers
                 existingPost.Content = model.Content;
 
                 await _postService.UpdateAsync(existingPost);
+                _logger.LogInformation("Пост {PostId} успешно изменен пользователем {UserId}", id, userId);
+
 
                 // Обновляем теги
                 await UpdatePostTags(id, model.SelectedTagId);
@@ -248,9 +263,12 @@ namespace BlogApp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(Guid id)
         {
+            _logger.LogInformation("Попытка удаления поста {PostId} пользователем {UserId}", id, User.FindFirstValue(ClaimTypes.NameIdentifier));
+
             var post = await _postService.GetByIdAsync(id);
             if (post == null)
             {
+                _logger.LogWarning("Пост {PostId} не найден при попытке удаления", id);
                 return NotFound();
             }
 
@@ -259,10 +277,13 @@ namespace BlogApp.Controllers
 
             if (userRole != "Admin" && userRole != "Moderator" && post.AuthorId != userId)
             {
+                _logger.LogWarning("Отказано в доступе при удалении поста {PostId} пользователем {UserId}", id, userId);
                 return Forbid();
             }
 
             await _postService.DeleteAsync(id);
+            _logger.LogInformation("Пост {PostId} успешно удален пользователем {UserId}", id, userId);
+
 
             return RedirectToAction("Index");
         }

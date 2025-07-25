@@ -1,9 +1,17 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace BlogApp.Controllers
 {
     public class ErrorController : Controller
     {
+        private readonly ILogger<ErrorController> _logger;
+
+        public ErrorController(ILogger<ErrorController> logger)
+        {
+            _logger = logger;
+        }
+
         [Route("Error/403")]
         public IActionResult Error403() => View();
 
@@ -13,6 +21,8 @@ namespace BlogApp.Controllers
         [Route("Error/{statusCode}")]
         public IActionResult HttpStatusCodeHandler(int statusCode)
         {
+            _logger.LogWarning("Ошибка {StatusCode} при обработке запроса", statusCode);
+
             return statusCode switch
             {
                 403 => View("Error403"),
@@ -27,12 +37,15 @@ namespace BlogApp.Controllers
         [Route("Error/AccessDenied")]
         public IActionResult AccessDenied()
         {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            _logger.LogWarning("Отказано в доступе для пользователя {UserId}", userId);
             return View();
         }
 
         [Route("Error/LoginError")]
         public IActionResult LoginError(string message)
         {
+            _logger.LogWarning("Ошибка входа: {Message}", message);
             ViewBag.ErrorMessage = message;
             return View();
         }

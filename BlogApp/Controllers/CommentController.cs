@@ -25,32 +25,34 @@ namespace BlogApp.Controllers
         [Authorize]
         public async Task<IActionResult> Index()
         {
+            _logger.LogInformation("Пользователь {UserId} запросил список комментариев.",
+                User.FindFirstValue(ClaimTypes.NameIdentifier));
+
             var comments = await _commentService.GetAllCommentsWithViewModelAsync(User);
             return View("AllComments", comments);
-        }
-
-        [HttpGet("{id}")]
-        [AllowAnonymous]
-        public async Task<ActionResult<Comment>> GetById(Guid id)
-        {
-            var comment = await _commentService.GetByIdAsync(id);
-            if (comment == null)
-                return NotFound();
-            return Ok(comment);
         }
 
         [Authorize]
         [HttpGet("edit/{id}")]
         public async Task<IActionResult> Edit(Guid id, string returnUrl = null)
         {
+            _logger.LogInformation("Пользователь {UserId} запросил редактирование комментария {CommentId}.",
+                User.FindFirstValue(ClaimTypes.NameIdentifier), id);
+
             var comment = await _commentService.GetByIdAsync(id);
-            if (comment == null) return NotFound();
+            if (comment == null)
+            {
+                _logger.LogWarning("Комментарий с ID {CommentId} не найден при попытке редактирования.", id);
+                return NotFound();
+            }
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var isAdminOrModerator = User.IsInRole("Admin") || User.IsInRole("Moderator");
 
             if (!isAdminOrModerator && comment.AuthorId != userId)
             {
+                _logger.LogWarning("Попытка несанкционированного редактирования комментария {CommentId} пользователем {UserId}.",
+                    id, userId);
                 return Forbid();
             }
 
@@ -72,19 +74,28 @@ namespace BlogApp.Controllers
         {
             if (!ModelState.IsValid)
             {
+                _logger.LogWarning("Редактирование комментария не удалось: модель не валидна.");
                 return View("~/Views/Shared/EditComment.cshtml", model);
             }
 
             var comment = await _commentService.GetByIdAsync(id);
-            if (comment == null) return NotFound();
+            if (comment == null)
+            {
+                _logger.LogWarning("Комментарий с ID {CommentId} не найден при попытке сохранения", id);
+                return NotFound();
+            }
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var isAdminOrModerator = User.IsInRole("Admin") || User.IsInRole("Moderator");
 
             if (!isAdminOrModerator && comment.AuthorId != userId)
             {
+                _logger.LogWarning("Попытка несанкционированного сохранения комментария {CommentId} пользователем {UserId}",
+                    id, userId);
                 return Forbid();
             }
+
+            _logger.LogInformation("Сохранение комментария {CommentId} пользователем {UserId}", id, userId);
 
             comment.Content = model.Content;
             await _commentService.UpdateAsync(comment);
@@ -103,60 +114,52 @@ namespace BlogApp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Create(CommentCreateViewModel model)
         {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
             if (string.IsNullOrWhiteSpace(model.Content))
             {
+                _logger.LogWarning("Попытка создания пустого комментария к посту {PostId} пользователем {UserId}",
+                    model.PostId, userId);
+
                 ModelState.AddModelError(nameof(model.Content), "Комментарий не может быть пустым.");
                 return RedirectToAction("GetById", "Post", new { id = model.PostId });
             }
-
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            _logger.LogInformation("Создание комментария к посту {PostId} пользователем {UserId}",
+                model.PostId, userId);
 
             await _commentService.CreateFromViewAsync(model.PostId, model.Content, userId);
 
             return RedirectToAction("GetById", "Post", new { id = model.PostId });
         }
 
-        // Редактировать комментарии могут админ, модератор и автор
-        [Authorize(Roles = "Admin,Moderator")]
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update(Guid id, [FromBody] Comment model)
-        {
-            var comment = await _commentService.GetByIdAsync(id);
-            if (comment == null)
-                return NotFound();
-
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var userRole = User.FindFirstValue(ClaimTypes.Role);
-
-            if (userRole != "Admin" && userRole != "Moderator" && comment.AuthorId != userId)
-                return Forbid();
-
-            comment.Content = model.Content;
-            await _commentService.UpdateAsync(comment);
-
-            return NoContent();
-        }
 
         [Authorize]
         [HttpPost("delete/{id}")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(Guid id)
         {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            _logger.LogInformation("Запрос на удаление комментария {CommentId} пользователем {UserId}",
+                id, userId);
+
             var comment = await _commentService.GetByIdAsync(id);
             if (comment == null)
             {
+                _logger.LogWarning("Комментарий с ID {CommentId} не найден при попытке удаления", id);
                 return NotFound();
             }
 
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var userRole = User.FindFirstValue(ClaimTypes.Role);
 
             if (userRole != "Admin" && userRole != "Moderator" && comment.AuthorId != userId)
             {
+                _logger.LogWarning("Попытка несанкционированного удаления комментария {CommentId}", id);
                 return Forbid();
             }
 
             await _commentService.DeleteAsync(id);
+            _logger.LogInformation("Комментарий {CommentId} успешно удален пользователем {UserId}",
+                id, userId);
 
             return RedirectToAction("GetById", "Post", new { id = comment.PostId });
         }

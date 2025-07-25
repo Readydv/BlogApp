@@ -15,16 +15,19 @@ namespace BlogApp.Controllers
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<Role> _roleManager;
+        private readonly ILogger<UserController> _logger;
 
-        public UserController(UserManager<ApplicationUser> userManager, RoleManager<Role> roleManager)
+        public UserController(UserManager<ApplicationUser> userManager, RoleManager<Role> roleManager, ILogger<UserController> logger)
         {
             _userManager = userManager;
             _roleManager = roleManager;
+            _logger = logger;
         }
 
         [HttpGet]
         public async Task<IActionResult> Index()
         {
+            _logger.LogInformation("Запрос списка пользователей администратором.");
             // 1. Получаем данные последовательно
             var users = await _userManager.Users
                 .AsNoTracking()
@@ -42,6 +45,8 @@ namespace BlogApp.Controllers
             {
                 var rolesForUser = await _userManager.GetRolesAsync(user);
                 userRolesDict[user.Id] = rolesForUser.ToList();
+                _logger.LogDebug("Обработан пользователь {UserId} с ролями: {Roles}",
+                        user.Id, string.Join(", ", rolesForUser));
             }
 
             // 3. Строим модель представления
@@ -58,15 +63,23 @@ namespace BlogApp.Controllers
                 AvailableRoles = roles
             };
 
+            _logger.LogInformation("Успешно возвращено {UserCount} пользователей", users.Count);
+
             return View("~/Views/Shared/AllUsers.cshtml", model);
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(Guid id)
         {
+            _logger.LogInformation("Запрос данных пользователя {UserId} администратором",
+                id);
+
             var user = await _userManager.FindByIdAsync(id.ToString());
             if (user == null)
+            {
+                _logger.LogWarning("Пользователь {UserId} не найден", id);
                 return NotFound();
+            }
 
             return Ok(new
             {
@@ -79,8 +92,14 @@ namespace BlogApp.Controllers
         [HttpGet("edit/{id}")]
         public async Task<IActionResult> Edit(string id)
         {
+            _logger.LogInformation("Запрос формы редактирования пользователя {UserId} администратором", id);
+
             var user = await _userManager.FindByIdAsync(id);
-            if (user == null) return NotFound();
+            if (user == null)
+            {
+                _logger.LogWarning("Пользователь {UserId} не найден при запросе формы редактирования", id);
+                return NotFound();
+            }
 
             var model = new EditUserViewModel
             {
@@ -91,6 +110,7 @@ namespace BlogApp.Controllers
                 SelectedRoles = (await _userManager.GetRolesAsync(user)).ToList()
             };
 
+            _logger.LogDebug("Данные для редактирования пользователя {UserId} успешно подготовлены", id);
             return View("~/Views/Account/EditUser.cshtml", model);
         }
 
@@ -98,27 +118,49 @@ namespace BlogApp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(string id, EditUserViewModel model)
         {
+            _logger.LogInformation("Попытка обновления пользователя {UserId} администратором.",
+                id);
+
             // Загружаем роли перед проверкой модели
             model.AvailableRoles = await _roleManager.Roles.ToListAsync();
 
             if (!ModelState.IsValid)
             {
+                _logger.LogWarning("Некорректные данные при редактировании пользователя {UserId}: {Errors}",
+                    id, string.Join("; ", ModelState.Values.SelectMany(v => v.Errors)));
                 return View("~/Views/Account/EditUser.cshtml", model);
             }
 
             var user = await _userManager.FindByIdAsync(id);
-            if (user == null) return NotFound();
+            if (user == null)
+            {
+                _logger.LogWarning("Пользователь {UserId} не найден при попытке обновления", id);
+                return NotFound();
+            }
+
+            _logger.LogDebug("Текущие данные пользователя: Name={CurrentName}, Email={CurrentEmail}",
+                    user.UserName, user.Email);
 
             // Обновляем только измененные поля
             if (user.UserName != model.UserName)
+            {
+                _logger.LogInformation("Изменение имени пользователя с {OldName} на {NewName}",
+                        user.UserName, model.UserName);
                 user.UserName = model.UserName;
+            }
 
             if (user.Email != model.Email)
+            {
+                _logger.LogInformation("Изменение email пользователя с {OldEmail} на {NewEmail}",
+                        user.Email, model.Email);
                 user.Email = model.Email;
+            }
 
             var updateResult = await _userManager.UpdateAsync(user);
             if (!updateResult.Succeeded)
             {
+                _logger.LogError("Ошибка обновления пользователя {UserId}: {Errors}",
+                            id, string.Join(", ", updateResult.Errors.Select(e => e.Description)));
                 AddErrors(updateResult);
                 return View("~/Views/Account/EditUser.cshtml", model);
             }
@@ -175,15 +217,20 @@ namespace BlogApp.Controllers
         [HttpPost("Delete")]
         public async Task<IActionResult> Delete(string id)
         {
+            _logger.LogInformation("Попытка удаления пользователя {UserId} администратором.",
+                id);
+
             var user = await _userManager.FindByIdAsync(id);
             if (user == null)
             {
+                _logger.LogWarning("Пользователь {UserId} не найден при попытке удаления", id);
                 return NotFound();
             }
 
             var result = await _userManager.DeleteAsync(user);
             if (result.Succeeded)
             {
+                _logger.LogInformation("Пользователь {UserId} успешно удален", id);
                 return RedirectToAction(nameof(Index)); // <-- вот так нужно
             }
 

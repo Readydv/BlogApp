@@ -14,18 +14,21 @@ namespace BlogApp.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IUserProfileService _userProfileService;
+        private readonly ILogger<AuthController> _logger;
 
-        public AuthController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IUserProfileService userProfileService)
+        public AuthController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IUserProfileService userProfileService, ILogger<AuthController> logger)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _userProfileService = userProfileService;
+            _logger = logger;
         }
 
         [HttpGet]
         [Route("Register")]
         public IActionResult Register()
         {
+            _logger.LogInformation("Открыта форма регистрации.");
             return View();
         }
 
@@ -35,6 +38,7 @@ namespace BlogApp.Controllers
         {
             if (!ModelState.IsValid)
             {
+                _logger.LogWarning("Регистрация не удалась: модель не валидна");
                 // Возвращаем модель с ошибками в то же представление
                 return View("~/Views/Home/Index.cshtml", new MainViewModel
                 {
@@ -54,6 +58,7 @@ namespace BlogApp.Controllers
 
             if (!result.Succeeded)
             {
+                _logger.LogWarning("Регистрация пользователя {UserName} не удалась: {Errors}", model.UserName);
                 foreach (var error in result.Errors)
                 {
                     ModelState.AddModelError(string.Empty, error.Description);
@@ -69,6 +74,8 @@ namespace BlogApp.Controllers
             await _userManager.AddToRoleAsync(user, "User");
             await _signInManager.SignInAsync(user, isPersistent: false);
 
+            _logger.LogInformation("Пользователь {UserName} успешно зарегистрирован и вошел в систему.", model.UserName);
+
             // Перенаправляем на главную страницу после успешной регистрации
             return RedirectToAction("Index", "Home");
         }
@@ -77,6 +84,7 @@ namespace BlogApp.Controllers
         [Route("Login")]
         public IActionResult Login()
         {
+            _logger.LogInformation("Открыта форма входа.");
             return View();
         }
 
@@ -87,6 +95,7 @@ namespace BlogApp.Controllers
         {
             if (!ModelState.IsValid)
             {
+                _logger.LogWarning("Вход пользователя не удался: модель не валидна.");
                 return View("~/Views/Home/Index.cshtml", new MainViewModel
                 {
                     LoginViewModel = model,
@@ -101,6 +110,7 @@ namespace BlogApp.Controllers
 
             if (!result.Succeeded)
             {
+                _logger.LogWarning("Неудачная попытка входа для пользователя: {UserName}.", model.UserName);
                 ModelState.AddModelError(string.Empty, "Неверное имя пользователя или пароль");
                 return View("~/Views/Home/Index.cshtml", new MainViewModel
                 {
@@ -108,6 +118,7 @@ namespace BlogApp.Controllers
                 });
             }
 
+            _logger.LogInformation("Пользователь {UserName} успешно вошёл в систему.", model.UserName);
             // Перенаправляем на главную страницу (Index)
             return RedirectToAction("Index", "Home");
         }
@@ -117,7 +128,9 @@ namespace BlogApp.Controllers
         [Route("Logout")]
         public async Task<IActionResult> Logout()
         {
+            var userName = User.Identity.Name;
             await _signInManager.SignOutAsync();
+            _logger.LogInformation("Пользователь {UserName} вышел из системы.", userName);
             return RedirectToAction("Index", "Home");
         }
 
@@ -126,6 +139,7 @@ namespace BlogApp.Controllers
         public async Task<IActionResult> Me()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            _logger.LogInformation("Пользователь {UserId} открыл свой профиль.", userId);
             var model = await _userProfileService.GetUserProfileAsync(userId);
             return View("~/Views/Account/Profile.cshtml", model);
         }
@@ -139,9 +153,11 @@ namespace BlogApp.Controllers
 
             if (model.User == null)
             {
+                _logger.LogWarning("Профиль пользователя с ID {UserId} не найден.", userId);
                 return NotFound();
             }
 
+            _logger.LogInformation("Профиль пользователя с ID {UserId} просмотрен.", userId);
             return View("~/Views/Account/Profile.cshtml", model);
         }
     }
