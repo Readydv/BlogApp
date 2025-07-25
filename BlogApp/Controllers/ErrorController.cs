@@ -13,10 +13,18 @@ namespace BlogApp.Controllers
         }
 
         [Route("Error/403")]
-        public IActionResult Error403() => View();
+        public IActionResult Error403()
+        {
+            _logger.LogWarning("Доступ запрещен (403) для пользователя {UserId}", User.FindFirstValue(ClaimTypes.NameIdentifier));
+            return View();
+        }
 
         [Route("Error/404")]
-        public IActionResult Error404() => View();
+        public IActionResult Error404()
+        {
+            _logger.LogWarning("Страница не найдена (404) по пути: {Path}", HttpContext.Request.Path);
+            return View();
+        }
 
         [Route("Error/{statusCode}")]
         public IActionResult HttpStatusCodeHandler(int statusCode)
