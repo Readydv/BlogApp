@@ -107,7 +107,7 @@ try
         }
         catch (Exception ex)
         {
-            logger.Error(ex, $"Ошибка при миграции или сидировании: {ex.Message} \n {ex.StackTrace}");
+            logger.Error(ex, "Ошибка при миграции или сидировании: {Message} \n {StackTrace}", ex.Message, ex.StackTrace);
         }
     }
 
@@ -116,7 +116,7 @@ try
 catch (Exception ex)
 {
     // Лог фатальных ошибок
-    logger.Fatal(ex, "Прилоожениие завершилось аварийно при запуске");
+    logger.Fatal(ex, "Приложениие завершилось аварийно при запуске");
     throw;
 }
 finally
