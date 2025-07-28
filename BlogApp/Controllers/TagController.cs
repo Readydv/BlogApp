@@ -83,7 +83,7 @@ namespace BlogApp.Controllers
                 Name = t.Name
             }).ToList();
 
-            return View("Index", viewModel);
+            return View("~/Views/Shared/TagManager.cshtml", viewModel);
         }
 
         [Authorize(Roles = "Admin,User")]
