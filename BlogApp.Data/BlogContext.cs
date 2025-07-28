@@ -1,8 +1,8 @@
-﻿using BlogApp.Models;
+﻿using BlogApp.Data.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-namespace BlogApp
+namespace BlogApp.Data
 {
     public class BlogContext : IdentityDbContext<ApplicationUser, Role, string>
     {

@@ -1,4 +1,4 @@
-﻿namespace BlogApp.Models
+﻿namespace BlogApp.Data.Models
 {
     public class Tag
     {

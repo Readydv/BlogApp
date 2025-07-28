@@ -1,4 +1,4 @@
-﻿using BlogApp.Models;
+﻿using BlogApp.Data.Models;
 using BlogApp.ViewModels;
 using System.Security.Claims;
 
