@@ -1,7 +1,8 @@
 ﻿using BlogApp.InterfaceServices;
-using BlogApp.Models;
+using BlogApp.Data.Models;
 using BlogApp.ViewModels;
 using Microsoft.EntityFrameworkCore;
+using BlogApp.Data;
 
 namespace BlogApp.Services
 {

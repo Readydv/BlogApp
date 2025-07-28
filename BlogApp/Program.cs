@@ -1,11 +1,12 @@
 using BlogApp;
 using BlogApp.InterfaceServices;
-using BlogApp.Models;
+using BlogApp.Data.Models;
 using BlogApp.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using NLog;
 using NLog.Web;
+using BlogApp.Data;
 
 // Инициализируем логгер до сборки приложения
 var logger = LogManager.Setup()

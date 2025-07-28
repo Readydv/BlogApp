@@ -1,5 +1,5 @@
 using System.Diagnostics;
-using BlogApp.Models;
+using BlogApp.Data.Models;
 using BlogApp.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 

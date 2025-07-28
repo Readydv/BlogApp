@@ -1,4 +1,4 @@
-﻿using BlogApp.Models;
+﻿using BlogApp.Data.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using System;

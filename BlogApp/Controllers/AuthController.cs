@@ -1,5 +1,5 @@
 ﻿using BlogApp.InterfaceServices;
-using BlogApp.Models;
+using BlogApp.Data.Models;
 using BlogApp.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;

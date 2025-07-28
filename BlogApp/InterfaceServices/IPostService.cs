@@ -1,4 +1,4 @@
-﻿using BlogApp.Models;
+﻿using BlogApp.Data.Models;
 using System.Runtime.CompilerServices;
 
 namespace BlogApp.InterfaceServices
