@@ -7,6 +7,7 @@ using System.Security.Claims;
 
 namespace BlogApp.Controllers
 {
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Authorize(Roles = "Admin")]
     [Route("[controller]")]
     public class RoleController : Controller

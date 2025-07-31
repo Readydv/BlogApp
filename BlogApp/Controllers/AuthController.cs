@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 
 namespace BlogApp.Controllers
 {
+    [ApiExplorerSettings(IgnoreApi = true)]
     public class AuthController : Controller
     {
         private readonly UserManager<ApplicationUser> _userManager;

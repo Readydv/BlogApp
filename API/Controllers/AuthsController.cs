@@ -1,4 +1,5 @@
-﻿using BlogApp.Data.Models;
+﻿using API.DTOs;
+using BlogApp.Data.Models;
 using BlogApp.InterfaceServices;
 using BlogApp.ViewModels;
 using Microsoft.AspNetCore.Authorization;
@@ -30,7 +31,7 @@ namespace API.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] RegisterViewModel model)
+        public async Task<IActionResult> Register([FromBody] RegisterDto model)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -53,7 +54,7 @@ namespace API.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginViewModel model)
+        public async Task<IActionResult> Login([FromBody] LoginDto model)
         {
             var result = await _signInManager.PasswordSignInAsync(
                 model.UserName, model.Password, isPersistent: false, lockoutOnFailure: false);

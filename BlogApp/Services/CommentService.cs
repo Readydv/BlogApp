@@ -4,6 +4,8 @@ using BlogApp.ViewModels;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using BlogApp.Data;
+using API.DTOs;
+using BlogApp.DTOs;
 
 namespace BlogApp.Services
 {
@@ -75,6 +77,36 @@ namespace BlogApp.Services
                     CanDelete = isAdminOrModerator || c.AuthorId == userId
                 })
                 .ToListAsync();
+        }
+
+        public async Task<IEnumerable<CommentDto>> GetAllCommentsWithDtoAsync(ClaimsPrincipal user)
+        {
+            var viewModels = await GetAllCommentsWithViewModelAsync(user);
+
+            return viewModels.Select(vm => new CommentDto
+            {
+                Id = vm.Id,
+                Content = vm.Content,
+                AuthorName = vm.AuthorName,
+                CreatedDate = vm.CreatedDate,
+                PostId = vm.PostId,
+                PostTitle = vm.PostTitle
+            });
+        }
+
+        public async Task<CommentResponseDto> GetCommentDetailsAsync(Guid id)
+        {
+            return await _context.Comments
+                .Where(c => c.Id == id)
+                .Select(c => new CommentResponseDto
+                {
+                    Id = c.Id,
+                    Content = c.Content,
+                    CreatedDate = c.CreatedDate,
+                    AuthorName = c.Author.UserName, // Только имя автора
+                    PostId = c.PostId
+                })
+                .FirstOrDefaultAsync();
         }
 
         public async Task<IEnumerable<Comment>> GetAllAsync ()

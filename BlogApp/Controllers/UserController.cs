@@ -9,6 +9,7 @@ using System.Security.Claims;
 
 namespace BlogApp.Controllers
 {
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Route("[controller]")]
     [Authorize (Roles = "Admin")] // Все методы требуют аутентификации
     public class UserController : Controller

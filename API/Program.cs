@@ -1,6 +1,8 @@
 using BlogApp.Data;
+using BlogApp.Data.Models;
 using BlogApp.InterfaceServices;
 using BlogApp.Services;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,6 +11,16 @@ var builder = WebApplication.CreateBuilder(args);
 // Подключаем DbContext
 builder.Services.AddDbContext<BlogContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddIdentity<ApplicationUser, Role>(options =>
+{
+    options.Password.RequiredLength = 6;
+    options.Password.RequireDigit = true;
+    options.Password.RequireNonAlphanumeric = false;
+    options.User.RequireUniqueEmail = true;
+})
+    .AddEntityFrameworkStores<BlogContext>()
+    .AddDefaultTokenProviders();
 
 // Регистрируем сервисы
 builder.Services.AddScoped<ICommentService, CommentService>();
@@ -33,6 +45,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

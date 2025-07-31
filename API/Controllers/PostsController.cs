@@ -4,6 +4,7 @@ using BlogApp.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using API.DTOs;
 
 namespace API.Controllers
 {
@@ -27,7 +28,7 @@ namespace API.Controllers
 
         // ✅ Создание поста
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CreatePostViewModel model)
+        public async Task<IActionResult> Create([FromBody] CreatePostDto model)
         {
             if (!ModelState.IsValid)
             {
@@ -98,7 +99,7 @@ namespace API.Controllers
 
         // ✅ Редактировать пост
         [HttpPut("{id}")]
-        public async Task<IActionResult> Edit(Guid id, [FromBody] EditPostViewModel model)
+        public async Task<IActionResult> Edit(Guid id, [FromBody] EditPostDto model)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 

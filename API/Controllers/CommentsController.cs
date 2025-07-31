@@ -1,4 +1,6 @@
-﻿using BlogApp.InterfaceServices;
+﻿using API.DTOs;
+using BlogApp.DTOs;
+using BlogApp.InterfaceServices;
 using BlogApp.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -21,23 +23,15 @@ namespace API.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        [AllowAnonymous]
+        public async Task<ActionResult<IEnumerable<CommentDto>>> GetAll()
         {
-            var comments = await _commentService.GetAllCommentsWithViewModelAsync(User);
+            var comments = await _commentService.GetAllCommentsWithDtoAsync(User);
             return Ok(comments);
         }
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(Guid id)
-        {
-            var comment = await _commentService.GetByIdAsync(id);
-            if (comment == null)
-                return NotFound();
-            return Ok(comment);
-        }
-
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CommentCreateViewModel model)
+        public async Task<IActionResult> Create([FromBody] CommentCreateDto model)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrWhiteSpace(model.Content))
@@ -48,7 +42,7 @@ namespace API.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(Guid id, [FromBody] CommentEditViewModel model)
+        public async Task<ActionResult<CommentResponseDto>> Update(Guid id, [FromBody] CommentEditDto model)
         {
             var comment = await _commentService.GetByIdAsync(id);
             if (comment == null)
@@ -63,7 +57,10 @@ namespace API.Controllers
             comment.Content = model.Content;
             await _commentService.UpdateAsync(comment);
 
-            return Ok(comment);
+            // Получаем обновленный комментарий с нужными данными автора
+            var updatedComment = await _commentService.GetCommentDetailsAsync(id);
+
+            return Ok(updatedComment);
         }
 
         [HttpDelete("{id}")]

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BlogApp.Controllers
 {
+    [ApiExplorerSettings(IgnoreApi = true)]
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
