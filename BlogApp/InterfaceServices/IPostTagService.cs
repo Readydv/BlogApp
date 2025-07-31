@@ -8,5 +8,6 @@ namespace BlogApp.InterfaceServices
         Task<IEnumerable<Tag>> GetTagsForPostAsync(Guid postId);
         Task<int> GetPostCountForTagAsync(Guid tagId);
         Task RemoveTagFromPostAsync(Guid postId, Guid tagId);
+        Task UpdatePostTagsAsync(Guid postId, List<Guid> selectedTagIds);
     }
 }

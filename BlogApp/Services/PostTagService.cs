@@ -58,5 +58,30 @@ namespace BlogApp.Services
                 await _context.SaveChangesAsync();
             }
         }
+
+        public async Task UpdatePostTagsAsync(Guid postId, List<Guid> selectedTagIds)
+        {
+            // Получаем текущие теги поста
+            var currentTags = await _context.PostTags
+                .Where(pt => pt.PostId == postId)
+                .ToListAsync();
+
+            // Удаляем отсутствующие теги
+            var tagsToRemove = currentTags
+                .Where(ct => !selectedTagIds.Contains(ct.TagId))
+                .ToList();
+
+            _context.PostTags.RemoveRange(tagsToRemove);
+
+            // Добавляем новые теги
+            var existingTagIds = currentTags.Select(ct => ct.TagId).ToList();
+            var tagsToAdd = selectedTagIds
+                .Where(tagId => !existingTagIds.Contains(tagId))
+                .Select(tagId => new PostTag { PostId = postId, TagId = tagId });
+
+            await _context.PostTags.AddRangeAsync(tagsToAdd);
+
+            await _context.SaveChangesAsync();
+        }
     }
 }

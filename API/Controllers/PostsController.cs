@@ -54,7 +54,8 @@ namespace API.Controllers
                 }
             }
 
-            return Ok(createdPost);
+            var result = await _postService.GetPostDetailsDtoAsync(createdPost.Id);
+            return CreatedAtAction(nameof(GetById), new { id = createdPost.Id }, result);
         }
 
         // ✅ Получить все посты
@@ -79,7 +80,7 @@ namespace API.Controllers
         [HttpGet("author/{authorId}")]
         public async Task<IActionResult> GetByAuthor(string authorId)
         {
-            var posts = await _postService.GetByAuthorAsync(authorId);
+            var posts = await _postService.GetPostListItemsByAuthorAsync(authorId);
             return Ok(posts);
         }
 
@@ -88,11 +89,8 @@ namespace API.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> GetById(Guid id)
         {
-            var post = await _postService.GetByIdWithDetailsAsync(id);
+            var post = await _postService.GetPostDetailsDtoAsync(id);
             if (post == null) return NotFound();
-
-            post.ViewCount++;
-            await _postService.UpdateAsync(post);
 
             return Ok(post);
         }
@@ -116,11 +114,14 @@ namespace API.Controllers
 
             existingPost.Title = model.Title;
             existingPost.Content = model.Content;
+
+            // 4. Обновляем теги
+            await _postTagService.UpdatePostTagsAsync(id, model.SelectedTagId);
+
             await _postService.UpdateAsync(existingPost);
 
-            await UpdatePostTags(id, model.SelectedTagId);
-
-            return Ok(existingPost);
+            var updatedPost = await _postService.GetPostDetailsDtoAsync(id);
+            return Ok(updatedPost);
         }
 
         // ✅ Удаление поста
@@ -139,7 +140,7 @@ namespace API.Controllers
             }
 
             await _postService.DeleteAsync(id);
-            return Ok(new { message = "Post deleted successfully" });
+            return Ok(new { message = "Пост удален успешно" });
         }
 
         private async Task UpdatePostTags(Guid postId, List<Guid> selectedTagIds)
