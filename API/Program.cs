@@ -4,6 +4,8 @@ using BlogApp.InterfaceServices;
 using BlogApp.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using NLog;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,7 +30,6 @@ builder.Services.AddScoped<IPostService, PostService>();
 builder.Services.AddScoped<IUserProfileService, UserProfileService>();
 builder.Services.AddScoped<ITagService, TagService>();
 builder.Services.AddScoped<IPostTagService, PostTagService>();
-builder.Services.AddScoped<IUserProfileService, UserProfileService>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -51,4 +52,26 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+
+    try
+    {
+        var context = services.GetRequiredService<BlogContext>();
+        context.Database.Migrate();
+
+        var roleManager = services.GetRequiredService<RoleManager<Role>>();
+        var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
+
+        // явно вызываем асинхронный метод сидировани€
+        DataSeeder.SeedRolesAndUsersAsync(roleManager, userManager).GetAwaiter().GetResult();
+    }
+    catch (Exception ex)
+    {
+    }
+}
+
 app.Run();
+
+
