@@ -2,6 +2,8 @@
 using BlogApp.Data.Models;
 using Microsoft.EntityFrameworkCore;
 using BlogApp.Data;
+using API.DTOs;
+using BlogApp.DTOs;
 
 namespace BlogApp.Services
 {
@@ -52,6 +54,35 @@ namespace BlogApp.Services
                 .ToListAsync();
         }
 
+        public async Task<PostResponseDto> GetPostDetailsDtoAsync(Guid id)
+        {
+            return await _context.Posts
+                .AsNoTracking()
+                .Where(p => p.Id == id)
+                .Select(p => new PostResponseDto
+                {
+                    Id = p.Id,
+                    Title = p.Title,
+                    Content = p.Content,
+                    AuthorName = p.Author.UserName,
+                    CreatedDate = p.CreatedDate,
+                    ViewCount = p.ViewCount,
+                    Tags = p.PostTags
+                        .Select(pt => pt.Tag.Name)
+                        .ToList(),
+                    Comments = p.Comments
+                        .Select(c => new CommentDto
+                        {
+                            Id = c.Id,
+                            Content = c.Content,
+                            AuthorName = c.Author.UserName,
+                            CreatedDate = c.CreatedDate
+                        })
+                        .ToList()
+                })
+                .FirstOrDefaultAsync();
+        }
+
         public async Task<IEnumerable<Post>> GetByAuthorAsync(string authorId)
         {
             return await _context.Posts
@@ -61,6 +92,26 @@ namespace BlogApp.Services
             .Include(p => p.PostTags)
                 .ThenInclude(pt => pt.Tag)
             .ToListAsync();
+        }
+
+        public async Task<IEnumerable<PostListItemDto>> GetPostListItemsByAuthorAsync(string authorId)
+        {
+            return await _context.Posts
+                .AsNoTracking()
+                .Where(p => p.AuthorId == authorId)
+                .OrderByDescending(p => p.CreatedDate)
+                .Select(p => new PostListItemDto
+                {
+                    Id = p.Id,
+                    Title = p.Title,
+                    AuthorName = p.Author.UserName,
+                    CreatedDate = p.CreatedDate,
+                    ViewCount = p.ViewCount,
+                    TagNames = p.PostTags
+                        .Select(pt => pt.Tag.Name)
+                        .ToList()
+                })
+                .ToListAsync();
         }
 
         public async Task<Post> GetByIdAsync(Guid id)
@@ -88,5 +139,6 @@ namespace BlogApp.Services
                 await _context.SaveChangesAsync();
             }
         }
+
     }
 }

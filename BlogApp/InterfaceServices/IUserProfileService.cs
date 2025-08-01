@@ -1,5 +1,6 @@
 ﻿using BlogApp.Data.Models;
 using BlogApp.ViewModels;
+using Microsoft.AspNetCore.Identity;
 
 namespace BlogApp.InterfaceServices
 {
@@ -7,5 +8,6 @@ namespace BlogApp.InterfaceServices
     {
         Task<UserProfileViewModel> GetUserProfileAsync(string userId);
         Task<ApplicationUser> GetUserWithPostsAndTagsAsync(string userId);
+        Task<IdentityResult> DeleteUserWithContentAsync(string userId);
     }
 }

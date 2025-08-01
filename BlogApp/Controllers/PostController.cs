@@ -10,6 +10,7 @@ using static BlogApp.ViewModels.PostListViewModel;
 
 namespace BlogApp.Controllers
 {
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Route("[controller]")]
     [Authorize] 
     public class PostController : Controller

@@ -8,6 +8,7 @@ using System.Security.Claims;
 
 namespace BlogApp.Controllers
 {
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Route("[controller]")]
     [Authorize] // Все методы требуют аутентификации
     public class CommentController : Controller

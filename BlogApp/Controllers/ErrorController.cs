@@ -3,6 +3,7 @@ using System.Security.Claims;
 
 namespace BlogApp.Controllers
 {
+    [ApiExplorerSettings(IgnoreApi = true)]
     public class ErrorController : Controller
     {
         private readonly ILogger<ErrorController> _logger;
