@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using BlogApp.Services;
 
 namespace BlogApp.Controllers
 {
@@ -17,12 +18,14 @@ namespace BlogApp.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<Role> _roleManager;
         private readonly ILogger<UserController> _logger;
+        private readonly IUserProfileService _userService;
 
-        public UserController(UserManager<ApplicationUser> userManager, RoleManager<Role> roleManager, ILogger<UserController> logger)
+        public UserController(UserManager<ApplicationUser> userManager, RoleManager<Role> roleManager, ILogger<UserController> logger, IUserProfileService userService)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _logger = logger;
+            _userService = userService;
         }
 
         [HttpGet]
@@ -219,7 +222,7 @@ namespace BlogApp.Controllers
         public async Task<IActionResult> Delete(string id)
         {
             _logger.LogInformation("Попытка удаления пользователя {UserId} администратором.",
-                id);
+            id);
 
             var user = await _userManager.FindByIdAsync(id);
             if (user == null)
@@ -228,7 +231,8 @@ namespace BlogApp.Controllers
                 return NotFound();
             }
 
-            var result = await _userManager.DeleteAsync(user);
+            var result = await _userService.DeleteUserWithContentAsync(id);
+
             if (result.Succeeded)
             {
                 _logger.LogInformation("Пользователь {UserId} успешно удален", id);

@@ -1,4 +1,6 @@
 ﻿using BlogApp.Data.Models;
+using BlogApp.DTOs;
+using BlogApp.InterfaceServices;
 using BlogApp.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -10,18 +12,19 @@ namespace API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize(Roles = "Admin")]
     public class UsersController : ControllerBase
     {
+        private readonly IUserProfileService _userProfileService;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<Role> _roleManager;
         private readonly ILogger<UsersController> _logger;
 
-        public UsersController(UserManager<ApplicationUser> userManager, RoleManager<Role> roleManager, ILogger<UsersController> logger)
+        public UsersController(UserManager<ApplicationUser> userManager, RoleManager<Role> roleManager, ILogger<UsersController> logger, IUserProfileService userProfileService)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _logger = logger;
+            _userProfileService = userProfileService;
         }
 
         // GET /api/users
@@ -69,50 +72,47 @@ namespace API.Controllers
 
         // PUT /api/users/{id}
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(string id, [FromBody] EditUserViewModel model)
+        public async Task<ActionResult<UserResponseDto>> UpdateUser(string id, [FromBody] UserUpdateDto dto)
         {
+            // Проверка соответствия ID
+            if (id != dto.Id)
+                return BadRequest("ID в URL и теле запроса не совпадают");
+
             var user = await _userManager.FindByIdAsync(id);
-            if (user == null) return NotFound();
+            if (user == null)
+                return NotFound();
 
-            user.UserName = model.UserName ?? user.UserName;
-            user.Email = model.Email ?? user.Email;
+            // Обновление данных
+            user.UserName = dto.UserName ?? user.UserName;
+            user.Email = dto.Email ?? user.Email;
 
-            var updateResult = await _userManager.UpdateAsync(user);
-            if (!updateResult.Succeeded) return BadRequest(updateResult.Errors);
+            // Обновление ролей
+            await UpdateUserRoles(user, dto.Roles);
 
-            await UpdateUserRoles(user, model.SelectedRoles ?? new List<string>());
+            await _userManager.UpdateAsync(user);
 
-            return Ok(new { Message = "Пользователь успешно обновлён" });
+            // Возвращаем обновленные данные
+            return Ok(new UserResponseDto
+            {
+                Id = user.Id,
+                UserName = user.UserName,
+                Email = user.Email,
+                Roles = dto.Roles
+            });
         }
 
         // DELETE /api/users/{id}
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(string id)
         {
-            var user = await _userManager.FindByIdAsync(id);
-            if (user == null) return NotFound();
+            var result = await _userProfileService.DeleteUserWithContentAsync(id);
 
-            var result = await _userManager.DeleteAsync(user);
-            if (!result.Succeeded) return BadRequest(result.Errors);
+            if (result.Succeeded)
+            {
+                return NoContent();
+            }
 
-            return NoContent();
-        }
-
-        // PUT /api/users/{id}/password
-        [HttpPut("{id}/password")]
-        [Authorize]
-        public async Task<IActionResult> ChangePassword(Guid id, [FromBody] ChangePasswordViewModel model)
-        {
-            var user = await _userManager.FindByIdAsync(id.ToString());
-            if (user == null) return NotFound();
-
-            if (user.Id.ToString() != User.FindFirstValue(ClaimTypes.NameIdentifier) && !User.IsInRole("Admin"))
-                return Forbid();
-
-            var result = await _userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
-            if (!result.Succeeded) return BadRequest(result.Errors);
-
-            return Ok(new { Message = "Пароль успешно изменен" });
+            return BadRequest(result.Errors);
         }
 
         private async Task UpdateUserRoles(ApplicationUser user, List<string> selectedRoles)

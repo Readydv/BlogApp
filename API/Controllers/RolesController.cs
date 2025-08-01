@@ -8,7 +8,6 @@ using System.Security.Claims;
 namespace API.Controllers
 {
     [ApiController]
-    [Authorize(Roles = "Admin")]
     [Route("api/[controller]")]
     public class RolesController : ControllerBase
     {

@@ -81,7 +81,7 @@ namespace API.Controllers
         }
 
         // DELETE /api/tags/{id}
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin, User")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {
